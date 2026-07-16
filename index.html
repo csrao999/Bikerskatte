@@ -195,37 +195,104 @@ img{display:block;max-width:100%}
 .hero__sub b{color:var(--ink);font-weight:600}
 .hero__cta{display:flex;gap:12px;flex-wrap:wrap}
 
-/* hero collage */
+/* ============================================================
+   THE MACHINE — robot ⇄ ZX-10R-style superbike
+   The page's single green thing. Everything else stays orange.
+   Each part carries two silhouettes (.r robot, .b bike) and one
+   transform. The morph is transform + crossfade, staggered.
+   ============================================================ */
 .hero__art{position:relative;z-index:1;height:min(76vh,660px)}
-.plate{
-  position:absolute;border-radius:var(--r);overflow:hidden;
-  background:var(--surface-2);
-  box-shadow:0 30px 70px -20px rgba(0,0,0,.85);
-  will-change:transform;
-}
-.plate img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.06)}
-/* duotone: unifies mixed photography into one voice */
-.plate::after{
-  content:"";position:absolute;inset:0;
-  background:linear-gradient(150deg,rgba(255,106,0,.44),rgba(14,14,16,.72));
-  mix-blend-mode:color;
-}
-.plate::before{
-  content:"";position:absolute;inset:0;z-index:2;
-  box-shadow:inset 0 0 0 1px rgba(242,240,237,.14);
-}
-.plate--a{left:4%;top:2%;width:62%;height:66%}
-.plate--b{right:0;top:24%;width:50%;height:52%}
-.plate--c{left:16%;bottom:0;width:44%;height:30%}
 
-.stamp{
-  position:absolute;right:2%;top:12%;z-index:5;
+.stage{
+  position:absolute;inset:0;
+  perspective:1400px;perspective-origin:50% 55%;
+  display:grid;place-items:center;
+}
+.rig{
+  width:100%;height:100%;transform-style:preserve-3d;will-change:transform;
+  transform:rotateY(0deg) rotateX(0deg) rotateZ(0deg);
+}
+#mech{width:100%;height:100%;overflow:visible}
+
+.part{transform-box:view-box;transform-origin:0 0;will-change:transform}
+.part .r,.part .b{transform-box:view-box;transform-origin:0 0}
+
+/* the morph: long, eased, staggered. Never linear, never a hard cut. */
+.stage .part{transition:transform 1500ms var(--ease-in-out)}
+.stage .part .r,.stage .part .b{transition:opacity 620ms var(--ease-out)}
+.stage .steer{transform-box:view-box;transform-origin:0 0}
+
+/* limbs commit first, the head seats last — that's the reveal beat */
+#p-legL{transition-delay:0ms}      #p-legL .r,#p-legL .b{transition-delay:220ms}
+#p-legR{transition-delay:90ms}     #p-legR .r,#p-legR .b{transition-delay:300ms}
+#p-armR{transition-delay:170ms}    #p-armR .r,#p-armR .b{transition-delay:380ms}
+#p-armL{transition-delay:240ms}    #p-armL .r,#p-armL .b{transition-delay:450ms}
+#p-torso{transition-delay:300ms}   #p-torso .r,#p-torso .b{transition-delay:520ms}
+#p-tail{transition-delay:380ms}    #p-tail .r,#p-tail .b{transition-delay:600ms}
+#p-nose{transition-delay:460ms}    #p-nose .r,#p-nose .b{transition-delay:680ms}
+#p-head{transition-delay:560ms}    #p-head .r,#p-head .b{transition-delay:800ms}
+#p-exh{transition-delay:640ms}
+#p-arm2{transition-delay:120ms}
+
+/* ---- ROBOT POSE ---- */
+.stage[data-form="robot"] #p-head {transform:translate(399px,129px) scale(1.12)}
+.stage[data-form="robot"] #p-torso{transform:translate(399px,266px) scale(1.12)}
+.stage[data-form="robot"] #p-tail {transform:translate(399px,226px) scale(1.03)}
+.stage[data-form="robot"] #p-nose {transform:translate(399px,356px) scale(1.12)}
+.stage[data-form="robot"] #p-armL {transform:translate(307px,282px) rotate(4deg) scale(1.12)}
+.stage[data-form="robot"] #p-armR {transform:translate(491px,282px) rotate(-4deg) scale(1.12)}
+.stage[data-form="robot"] #p-legL {transform:translate(367px,463px) scale(1.12)}
+.stage[data-form="robot"] #p-legR {transform:translate(432px,463px) scale(1.12)}
+.stage[data-form="robot"] #p-exh  {transform:translate(400px,300px) scale(.05);opacity:0}
+.stage[data-form="robot"] #p-arm2 {transform:translate(400px,300px) scale(.05);opacity:0}
+.stage[data-form="robot"] .part .r{opacity:1}
+.stage[data-form="robot"] .part .b{opacity:0}
+
+/* ---- BIKE POSE ---- */
+.stage[data-form="bike"] #p-head {transform:translate(602px,330px) rotate(-7deg)}
+.stage[data-form="bike"] #p-torso{transform:translate(408px,344px) rotate(-4deg)}
+.stage[data-form="bike"] #p-tail {transform:translate(296px,318px) rotate(-9deg)}
+.stage[data-form="bike"] #p-nose {transform:translate(546px,356px) rotate(-3deg)}
+.stage[data-form="bike"] #p-armL {transform:translate(518px,298px) rotate(-16deg)}
+.stage[data-form="bike"] #p-armR {transform:translate(584px,384px) rotate(7deg)}
+.stage[data-form="bike"] #p-legL {transform:translate(250px,440px)}
+.stage[data-form="bike"] #p-legR {transform:translate(578px,442px)}
+.stage[data-form="bike"] #p-exh  {transform:translate(342px,424px) rotate(-6deg);opacity:1}
+.stage[data-form="bike"] #p-arm2 {transform:translate(322px,432px) rotate(-3deg);opacity:1}
+.stage[data-form="bike"] .part .r{opacity:0}
+.stage[data-form="bike"] .part .b{opacity:1}
+
+#p-exh,#p-arm2{transition:transform 1500ms var(--ease-in-out),opacity 500ms var(--ease-out)}
+
+/* idle: the engine is running, so the machine breathes */
+.stage[data-form="bike"] .rig{animation:idle 2.9s var(--ease-in-out) infinite}
+@keyframes idle{
+  0%,100%{translate:0 0}
+  40%{translate:0 -5px}
+  70%{translate:0 1px}
+}
+
+/* control + badge */
+.stage__btn{
+  position:absolute;right:2%;bottom:3%;z-index:6;
+  background:transparent;border:0;cursor:pointer;
+  box-shadow:inset 0 0 0 1px rgba(242,240,237,.28);
+  border-radius:var(--r);color:var(--ink);
+  font-family:var(--display);font-size:13px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.14em;
+  min-height:40px;padding:0 16px;
+  transition:box-shadow 180ms var(--ease-out),color 180ms var(--ease-out);
+}
+.stage__btn:hover{box-shadow:inset 0 0 0 1px #5FCF00;color:#7CE800}
+.stage__btn:active{transform:scale(.97)}
+.stage__badge{
+  position:absolute;right:2%;top:8%;z-index:6;
   background:var(--accent);color:#0E0E10;border-radius:var(--r);
   padding:9px 13px;font-family:var(--display);font-weight:700;
   text-transform:uppercase;letter-spacing:.09em;font-size:14px;line-height:1.15;
   text-align:center;
 }
-.stamp small{display:block;font-size:10px;letter-spacing:.14em;opacity:.75}
+.stage__badge small{display:block;font-size:10px;letter-spacing:.14em;opacity:.75}
 
 .scroll-hint{
   position:absolute;left:var(--pad);bottom:26px;z-index:3;
@@ -369,7 +436,7 @@ img{display:block;max-width:100%}
   background:var(--surface-2);cursor:pointer;border:0;padding:0;
   transition:opacity 260ms var(--ease-out),transform 260ms var(--ease-out);
 }
-.cell img{width:100%;height:100%;object-fit:cover;
+.cell img,.cell video{width:100%;height:100%;object-fit:cover;
   filter:grayscale(1) contrast(1.05);
   transition:transform 420ms var(--ease-out),filter 300ms var(--ease-out)}
 .cell::after{
@@ -377,8 +444,20 @@ img{display:block;max-width:100%}
   background:linear-gradient(160deg,rgba(255,106,0,.40),rgba(14,14,16,.70));
   mix-blend-mode:color;transition:opacity 300ms var(--ease-out);
 }
-.cell:hover img{transform:scale(1.05);filter:grayscale(0) contrast(1)}
+.cell:hover img,.cell:hover video{transform:scale(1.05);filter:grayscale(0) contrast(1)}
 .cell:hover::after{opacity:.25}
+.cell__play{
+  position:absolute;left:50%;top:50%;z-index:3;
+  width:46px;height:46px;border-radius:50%;transform:translate(-50%,-50%);
+  background:rgba(14,14,16,.55);box-shadow:0 0 0 1px rgba(242,240,237,.3);
+  transition:transform 220ms var(--ease-out),background 220ms var(--ease-out);
+}
+.cell__play::after{
+  content:"";position:absolute;left:56%;top:50%;transform:translate(-50%,-50%);
+  border-style:solid;border-width:8px 0 8px 13px;
+  border-color:transparent transparent transparent var(--ink);
+}
+.cell:hover .cell__play{transform:translate(-50%,-50%) scale(1.12);background:rgba(255,106,0,.55)}
 .cell__cap{
   position:absolute;left:0;right:0;bottom:0;z-index:3;text-align:left;
   padding:34px 14px 12px;
@@ -408,6 +487,11 @@ img{display:block;max-width:100%}
   text-transform:uppercase;line-height:.98;letter-spacing:.01em;
 }
 .cell--note small{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.7}
+
+.gal__state{
+  margin-top:18px;font-size:13px;color:var(--muted);
+  letter-spacing:.04em;
+}
 
 /* ---------- quotes — marquee ---------- */
 .quotes{
@@ -527,7 +611,7 @@ img{display:block;max-width:100%}
   background:rgba(6,6,7,.94);padding:24px;
 }
 .lb[data-open="true"]{display:grid}
-.lb img{max-width:90vw;max-height:82vh;border-radius:var(--r);
+.lb img,.lb video{max-width:90vw;max-height:82vh;border-radius:var(--r);
   /* never animate from scale(0) — nothing appears from nothing */
   animation:pop 260ms var(--ease-out)}
 @keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
@@ -607,6 +691,10 @@ img{display:block;max-width:100%}
   .rv{opacity:1;transform:none}
   .hero h1 .ln > span{transform:none}
   .marq{animation:none;flex-wrap:wrap;width:auto}
+  /* the machine: skip the morph, present the bike, hold still */
+  .stage .part,.stage .part .r,.stage .part .b{transition:none !important}
+  .stage[data-form="bike"] .rig{animation:none}
+  .stage__btn{display:none}
 }
 @media (prefers-reduced-transparency:reduce){
   .nav{background:rgba(14,14,16,.97);backdrop-filter:none}
@@ -676,17 +764,245 @@ img{display:block;max-width:100%}
     </div>
   </div>
 
-  <div class="hero__art" aria-hidden="true">
-    <figure class="plate plate--a" data-depth="16">
-      <img src="https://picsum.photos/seed/katte-highway-dawn/900/700" alt="">
-    </figure>
-    <figure class="plate plate--b" data-depth="-22">
-      <img src="https://picsum.photos/seed/katte-ghat-curve/700/700" alt="">
-    </figure>
-    <figure class="plate plate--c" data-depth="30">
-      <img src="https://picsum.photos/seed/katte-group-stop/700/420" alt="">
-    </figure>
-    <div class="stamp" data-depth="-34">16<small>Members</small></div>
+  <div class="hero__art">
+    <div class="stage" id="stage" data-form="robot">
+      <div class="rig" id="rig">
+        <svg id="mech" viewBox="140 62 540 516" preserveAspectRatio="xMidYMid meet" role="img"
+             aria-label="A robot that folds down into a green superbike, steering toward your cursor.">
+          <defs>
+            <linearGradient id="gGreen" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#7CE800"/>
+              <stop offset=".55" stop-color="#4FBE00"/>
+              <stop offset="1" stop-color="#1F6B12"/>
+            </linearGradient>
+            <linearGradient id="gCarbon" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#2A2D31"/>
+              <stop offset=".5" stop-color="#141618"/>
+              <stop offset="1" stop-color="#232629"/>
+            </linearGradient>
+            <linearGradient id="gSteel" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#9AA1A8"/>
+              <stop offset=".5" stop-color="#4E5459"/>
+              <stop offset="1" stop-color="#23262A"/>
+            </linearGradient>
+            <linearGradient id="gLens" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#FFFFFF"/>
+              <stop offset=".45" stop-color="#CFF6D8"/>
+              <stop offset="1" stop-color="#2E8C4E"/>
+            </linearGradient>
+            <linearGradient id="gSheen" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+              <stop offset=".42" stop-color="#fff" stop-opacity="0"/>
+              <stop offset=".5" stop-color="#fff" stop-opacity=".85"/>
+              <stop offset=".58" stop-color="#fff" stop-opacity="0"/>
+              <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+            </linearGradient>
+            <radialGradient id="gGlow">
+              <stop offset="0" stop-color="#7CE800" stop-opacity=".55"/>
+              <stop offset="1" stop-color="#7CE800" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="gShadow">
+              <stop offset="0" stop-color="#000" stop-opacity=".75"/>
+              <stop offset="1" stop-color="#000" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="fHeat" x="-20%" y="-40%" width="140%" height="180%">
+              <feTurbulence id="heatNoise" type="fractalNoise" baseFrequency="0.02 0.09"
+                            numOctaves="2" seed="7" result="n"/>
+              <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+          </defs>
+
+          <!-- ground contact shadow -->
+          <ellipse id="shadow" cx="410" cy="546" rx="215" ry="24" fill="url(#gShadow)"/>
+
+          <!-- ambient engine glow, bike form only -->
+          <circle id="glow" cx="415" cy="410" r="150" fill="url(#gGlow)" opacity="0"/>
+
+          <!-- exhaust heat shimmer, bike form only -->
+          <g id="heat" opacity="0" filter="url(#fHeat)">
+            <path d="M392 424 q34 -6 62 2 q-30 12 -62 -2 Z" fill="#7CE800" opacity=".18"/>
+          </g>
+
+          <!-- ============ PARTS ============ -->
+
+          <!-- REAR WHEEL  <-  LEFT LEG -->
+          <g class="part" id="p-legL">
+            <g class="r">
+              <path d="M-19,-62 L19,-62 L22,-4 L16,34 L20,62 L-20,62 L-16,34 L-22,-4 Z" fill="url(#gCarbon)"/>
+              <path d="M-15,-52 L15,-52 L16,-14 L-16,-14 Z" fill="url(#gGreen)"/>
+              <rect x="-18" y="-8" width="36" height="9" rx="2" fill="url(#gSteel)"/>
+              <rect x="-21" y="56" width="42" height="12" rx="3" fill="#0D0E0F"/>
+            </g>
+            <g class="b">
+              <circle r="76" fill="#0E0F10"/>
+              <circle r="76" fill="none" stroke="#2B2E31" stroke-width="2"/>
+              <circle r="62" fill="#17191B"/>
+              <circle r="53" fill="none" stroke="url(#gGreen)" stroke-width="7"/>
+              <g stroke="#1B1D1F" stroke-width="9" stroke-linecap="round">
+                <path d="M0,-48 L0,-12"/><path d="M45.6,-14.8 L11.4,-3.7"/>
+                <path d="M28.2,38.8 L7.1,9.7"/><path d="M-28.2,38.8 L-7.1,9.7"/>
+                <path d="M-45.6,-14.8 L-11.4,-3.7"/>
+              </g>
+              <circle r="13" fill="url(#gSteel)"/><circle r="5" fill="#0B0C0D"/>
+            </g>
+          </g>
+
+          <!-- FRONT WHEEL  <-  RIGHT LEG -->
+          <g class="part" id="p-legR">
+            <g class="steer">
+              <g class="r">
+                <path d="M-19,-62 L19,-62 L22,-4 L16,34 L20,62 L-20,62 L-16,34 L-22,-4 Z" fill="url(#gCarbon)"/>
+                <path d="M-15,-52 L15,-52 L16,-14 L-16,-14 Z" fill="url(#gGreen)"/>
+                <rect x="-18" y="-8" width="36" height="9" rx="2" fill="url(#gSteel)"/>
+                <rect x="-21" y="56" width="42" height="12" rx="3" fill="#0D0E0F"/>
+              </g>
+              <g class="b">
+                <circle r="74" fill="#0E0F10"/>
+                <circle r="74" fill="none" stroke="#2B2E31" stroke-width="2"/>
+                <circle r="60" fill="#17191B"/>
+                <circle r="51" fill="none" stroke="url(#gGreen)" stroke-width="7"/>
+                <g stroke="#1B1D1F" stroke-width="9" stroke-linecap="round">
+                  <path d="M0,-46 L0,-11"/><path d="M43.7,-14.2 L10.9,-3.5"/>
+                  <path d="M27,37.2 L6.8,9.3"/><path d="M-27,37.2 L-6.8,9.3"/>
+                  <path d="M-43.7,-14.2 L-10.9,-3.5"/>
+                </g>
+                <circle r="13" fill="url(#gSteel)"/><circle r="5" fill="#0B0C0D"/>
+                <path d="M-64,-38 q64,-26 128,0 l-6,14 q-58,-22 -116,0 Z" fill="#1A1C1E" opacity=".9"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- EXHAUST — bike only -->
+          <g class="part" id="p-exh">
+            <path d="M-52,-14 L26,-19 q26,2 26,17 q0,15 -26,17 L-52,10 Z" fill="url(#gSteel)"/>
+            <path d="M-52,-8 L24,-12 q16,2 16,10 q0,8 -16,10 L-52,4 Z" fill="#6E767D" opacity=".55"/>
+            <ellipse cx="50" cy="-2" rx="5" ry="16" fill="#0A0B0C"/>
+            <rect x="-16" y="-20" width="8" height="30" rx="2" fill="#0F1113"/>
+          </g>
+
+          <!-- SWINGARM — bike only -->
+          <g class="part" id="p-arm2">
+            <path d="M-72,-9 L58,-13 q14,3 14,12 q0,9 -14,11 L-72,9 Z" fill="url(#gCarbon)"/>
+            <path d="M-60,-4 L48,-7 l0,7 L-60,4 Z" fill="url(#gGreen)" opacity=".5"/>
+          </g>
+
+          <!-- TAIL  <-  BACKPACK -->
+          <g class="part" id="p-tail">
+            <g class="r">
+              <path d="M-46,-34 q46,-12 92,0 l6,44 q-52,16 -104,0 Z" fill="url(#gCarbon)"/>
+              <rect x="-30" y="-20" width="60" height="10" rx="3" fill="url(#gGreen)"/>
+              <rect x="-30" y="0" width="60" height="7" rx="3" fill="#2E3438"/>
+            </g>
+            <g class="b">
+              <path d="M-60,20 L-30,-30 L26,-50 L64,-40 L52,-20 L2,-6 L-40,28 Z" fill="url(#gGreen)"/>
+              <path d="M-30,-30 L26,-50 L44,-44 L-14,-20 Z" fill="#F2F0ED" opacity=".9"/>
+              <path d="M48,-44 L68,-38 L60,-24 L46,-26 Z" fill="#B9151E"/>
+            </g>
+          </g>
+
+          <!-- TORSO  ->  TANK + MID FAIRING -->
+          <g class="part" id="p-torso">
+            <g class="r">
+              <path d="M-62,-62 q62,-18 124,0 q6,52 -10,96 q-52,26 -104,0 q-16,-44 -10,-96 Z" fill="url(#gCarbon)"/>
+              <path d="M-42,-50 q42,-12 84,0 q4,34 -6,62 q-36,16 -72,0 q-10,-28 -6,-62 Z" fill="url(#gGreen)"/>
+              <path d="M-42,-50 q42,-12 84,0 q1,9 1,19 q-44,-14 -86,0 q0,-10 1,-19 Z" fill="#F2F0ED" opacity=".18"/>
+              <rect x="-28" y="-14" width="56" height="8" rx="4" fill="#0E0F10" opacity=".75"/>
+              <rect x="-28" y="4" width="56" height="8" rx="4" fill="#0E0F10" opacity=".75"/>
+              <path d="M-72,-58 q-18,10 -16,36 l18,4 Z" fill="url(#gSteel)"/>
+              <path d="M72,-58 q18,10 16,36 l-18,4 Z" fill="url(#gSteel)"/>
+            </g>
+            <g class="b">
+              <path d="M-102,8 L-72,-26 L-16,-44 L48,-42 L92,-18 L104,4 L84,22 L10,32 L-62,26 Z" fill="url(#gGreen)"/>
+              <path d="M-72,-26 L-16,-44 L48,-42 L62,-33 L-8,-30 L-58,-13 Z" fill="#F2F0ED" opacity=".92"/>
+              <path d="M-62,26 L10,32 L84,22 L70,33 L4,43 L-54,34 Z" fill="#0E0F10"/>
+              <path d="M-102,8 L-72,-26 L-50,-22 L-84,11 Z" fill="#141618"/>
+              <path d="M92,-18 L104,4 L84,22 L78,-8 Z" fill="#0E0F10" opacity=".45"/>
+              <ellipse cx="12" cy="-25" rx="15" ry="5" fill="#0A0B0C" opacity=".75"/>
+              <circle cx="12" cy="-25" r="4.5" fill="url(#gSteel)"/>
+            </g>
+          </g>
+
+          <!-- NOSE  <-  PELVIS  (fairing + winglets) -->
+          <g class="part" id="p-nose">
+            <g class="r">
+              <path d="M-44,-26 q44,-10 88,0 l-8,44 q-36,12 -72,0 Z" fill="url(#gSteel)"/>
+              <path d="M-30,-16 q30,-6 60,0 l-5,26 q-25,8 -50,0 Z" fill="url(#gGreen)"/>
+            </g>
+            <g class="b">
+              <path d="M-48,-46 L20,-40 L48,-6 L44,44 L-16,52 L-44,10 Z" fill="url(#gGreen)"/>
+              <path d="M-44,10 L-16,52 L44,44 L46,25 L-30,25 Z" fill="#F2F0ED"/>
+              <path d="M-48,-46 L-10,-42 L-24,-4 L-44,-2 Z" fill="#0E0F10" opacity=".5"/>
+              <path d="M20,-34 L70,-24 L68,-12 L18,-18 Z" fill="#111315"/>
+              <path d="M16,14 L66,26 L64,38 L14,30 Z" fill="#111315"/>
+            </g>
+          </g>
+
+          <!-- HEAD  ->  TWIN LED HEADLIGHT -->
+          <g class="part" id="p-head">
+            <g class="r">
+              <path d="M-40,-14 q0,-40 40,-40 q40,0 40,40 q0,32 -18,44 q-22,12 -44,0 q-18,-12 -18,-44 Z" fill="url(#gCarbon)"/>
+              <path d="M-30,-20 q0,-26 30,-26 q30,0 30,26 q0,10 -6,16 q-24,8 -48,0 q-6,-6 -6,-16 Z" fill="#0A0B0C"/>
+              <path d="M-24,-20 q0,-18 24,-18 q24,0 24,18 q0,6 -4,10 q-20,6 -40,0 q-4,-4 -4,-10 Z" fill="url(#gLens)" opacity=".9"/>
+              <rect x="-14" y="24" width="28" height="9" rx="4" fill="url(#gGreen)"/>
+              <path d="M40,-26 q14,4 14,18 l-14,4 Z" fill="url(#gSteel)"/>
+            </g>
+            <g class="b">
+              <path d="M-44,-26 L24,-38 L44,-18 L40,20 L14,34 L-40,22 Z" fill="#101214"/>
+              <path d="M-32,-20 L14,-28 L28,-14 L24,-2 L-30,-4 Z" fill="url(#gLens)"/>
+              <path d="M-28,6 L18,2 L26,12 L22,20 L-26,18 Z" fill="url(#gLens)" opacity=".85"/>
+              <path d="M30,-32 L46,-16 L42,16 L32,10 Z" fill="url(#gGreen)"/>
+            </g>
+          </g>
+
+          <!-- LEFT ARM  ->  HANDLEBAR -->
+          <g class="part" id="p-armL">
+            <g class="steer">
+              <g class="r">
+                <path d="M-15,-56 L15,-56 L17,-6 L13,20 L16,54 L-16,54 L-13,20 L-17,-6 Z" fill="url(#gCarbon)"/>
+                <rect x="-13" y="-48" width="26" height="26" rx="4" fill="url(#gGreen)"/>
+                <rect x="-16" y="-10" width="32" height="8" rx="2" fill="url(#gSteel)"/>
+                <path d="M-14,50 q14,-6 28,0 l0,14 q-14,6 -28,0 Z" fill="#0D0E0F"/>
+              </g>
+              <g class="b">
+                <rect x="-46" y="-7" width="92" height="13" rx="6" fill="url(#gSteel)"/>
+                <rect x="-46" y="-7" width="26" height="13" rx="6" fill="#0E0F10"/>
+                <rect x="20" y="-7" width="26" height="13" rx="6" fill="#0E0F10"/>
+                <path d="M28,-4 q22,-8 34,4 l-2,7 q-16,-8 -32,-2 Z" fill="url(#gSteel)"/>
+                <circle cx="0" cy="0" r="8" fill="url(#gGreen)"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- RIGHT ARM  ->  FRONT FORK -->
+          <g class="part" id="p-armR">
+            <g class="steer">
+              <g class="r">
+                <path d="M-15,-56 L15,-56 L17,-6 L13,20 L16,54 L-16,54 L-13,20 L-17,-6 Z" fill="url(#gCarbon)"/>
+                <rect x="-13" y="-48" width="26" height="26" rx="4" fill="url(#gGreen)"/>
+                <rect x="-16" y="-10" width="32" height="8" rx="2" fill="url(#gSteel)"/>
+                <path d="M-14,50 q14,-6 28,0 l0,14 q-14,6 -28,0 Z" fill="#0D0E0F"/>
+              </g>
+              <g class="b">
+                <rect x="-13" y="-58" width="26" height="56" rx="4" fill="url(#gSteel)"/>
+                <rect x="-11" y="-4" width="22" height="62" rx="4" fill="#C9D0D6"/>
+                <rect x="-13" y="-58" width="9" height="56" rx="4" fill="#F2F0ED" opacity=".35"/>
+                <rect x="-16" y="-62" width="32" height="10" rx="3" fill="url(#gGreen)"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- specular sweep, morph only -->
+          <rect id="sheen" x="-800" y="0" width="800" height="620" fill="url(#gSheen)"
+                opacity="0" style="mix-blend-mode:overlay"/>
+          <g id="sparks"></g>
+        </svg>
+      </div>
+
+      <button class="stage__btn" id="morphBtn" type="button" aria-live="polite">
+        <span id="morphLabel">Transform</span>
+      </button>
+      <div class="stage__badge"><b>16</b><small>Members</small></div>
+    </div>
   </div>
 
   <div class="scroll-hint" aria-hidden="true"><i></i>Scroll</div>
@@ -872,40 +1188,13 @@ img{display:block;max-width:100%}
     <button class="chip" data-f="charity" aria-pressed="false">Charity</button>
   </div>
 
-  <div class="bento rv" id="bento">
-    <button class="cell cell--w2 cell--h2" data-cat="ghats" data-src="https://picsum.photos/seed/katte-ghat-1/1200/1000">
-      <img src="https://picsum.photos/seed/katte-ghat-1/900/760" alt="Riders on a ghat section at dawn">
-      <span class="cell__cap"><small>Ghats</small>Charmadi, 05:41</span>
-    </button>
-    <button class="cell" data-cat="meets" data-src="https://picsum.photos/seed/katte-meet-1/1000/1000">
-      <img src="https://picsum.photos/seed/katte-meet-1/500/400" alt="Bikes parked in a row at a meetup">
-      <span class="cell__cap"><small>Meetups</small>Sunday Katte</span>
-    </button>
-    <div class="cell cell--note" aria-hidden="false">
+  <div class="bento rv" id="bento" aria-busy="true">
+    <div class="cell cell--note">
       <small lang="kn">ಒಟ್ಟಿಗೆ ಸವಾರಿ</small>
       <b>Ride together, and the distance stops being the point.</b>
     </div>
-    <button class="cell" data-cat="night" data-src="https://picsum.photos/seed/katte-night-1/1000/1000">
-      <img src="https://picsum.photos/seed/katte-night-1/500/400" alt="Headlights on a night ride">
-      <span class="cell__cap"><small>Night</small>NICE Road</span>
-    </button>
-    <button class="cell cell--w2" data-cat="charity" data-src="https://picsum.photos/seed/katte-charity-1/1200/700">
-      <img src="https://picsum.photos/seed/katte-charity-1/900/440" alt="Charity ride blood donation camp">
-      <span class="cell__cap"><small>Charity</small>Blood drive, Mysore</span>
-    </button>
-    <button class="cell" data-cat="ghats" data-src="https://picsum.photos/seed/katte-ghat-2/1000/1000">
-      <img src="https://picsum.photos/seed/katte-ghat-2/500/400" alt="A hairpin bend in the hills">
-      <span class="cell__cap"><small>Ghats</small>Kolli, bend 41</span>
-    </button>
-    <button class="cell" data-cat="night" data-src="https://picsum.photos/seed/katte-night-2/1000/1000">
-      <img src="https://picsum.photos/seed/katte-night-2/500/400" alt="Roadside tea stop after dark">
-      <span class="cell__cap"><small>Night</small>Chai, 02:10</span>
-    </button>
-    <button class="cell cell--w2" data-cat="meets" data-src="https://picsum.photos/seed/katte-meet-2/1200/700">
-      <img src="https://picsum.photos/seed/katte-meet-2/900/440" alt="Group photo of the club">
-      <span class="cell__cap"><small>Meetups</small>Anniversary, 2025</span>
-    </button>
   </div>
+  <p class="gal__state" id="galState">Loading photos…</p>
 </section>
 
 <!-- ===================== BIKES ===================== -->
@@ -1087,9 +1376,13 @@ img{display:block;max-width:100%}
   </div>
 </footer>
 
-<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer">
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Media viewer">
   <button class="lb__x" id="lbx" aria-label="Close">×</button>
-  <div><img id="lbimg" src="" alt=""><div class="lb__cap" id="lbcap"></div></div>
+  <div>
+    <img id="lbimg" src="" alt="">
+    <video id="lbvid" controls playsinline hidden></video>
+    <div class="lb__cap" id="lbcap"></div>
+  </div>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1193,29 +1486,46 @@ img{display:block;max-width:100%}
   },{threshold:0.5});
   document.querySelectorAll("[data-count]").forEach(function(el){cio.observe(el);});
 
-  /* ---------- gallery filter + lightbox ---------- */
+  /* ---------- gallery filter + lightbox — delegated, so it survives
+       cells being rendered asynchronously from the photo source ---------- */
+  var bento=document.getElementById("bento");
   var chips=[].slice.call(document.querySelectorAll(".chip"));
-  var cells=[].slice.call(document.querySelectorAll("#bento .cell[data-cat]"));
+  var activeFilter="all";
+  function applyFilter(){
+    bento.querySelectorAll(".cell[data-cat]").forEach(function(cell){
+      cell.hidden = !(activeFilter==="all" || cell.dataset.cat===activeFilter);
+    });
+  }
+  window.__applyFilter=applyFilter;
   chips.forEach(function(c){
     c.addEventListener("click",function(){
       chips.forEach(function(x){x.setAttribute("aria-pressed", x===c);});
-      var f=c.dataset.f;
-      cells.forEach(function(cell){ cell.hidden = !(f==="all" || cell.dataset.cat===f); });
+      activeFilter=c.dataset.f; applyFilter();
     });
   });
 
   var lb=document.getElementById("lb"), lbimg=document.getElementById("lbimg"),
+      lbvid=document.getElementById("lbvid"),
       lbcap=document.getElementById("lbcap"), lbx=document.getElementById("lbx"), last=null;
-  cells.forEach(function(cell){
-    cell.addEventListener("click",function(){
-      last=cell;
+  bento.addEventListener("click",function(e){
+    var cell=e.target.closest(".cell[data-src]");
+    if(!cell) return;
+    last=cell;
+    var isVideo=cell.dataset.type==="video";
+    lbimg.hidden=isVideo; lbvid.hidden=!isVideo;
+    if(isVideo){
+      lbvid.src=cell.dataset.src; lbvid.play().catch(function(){});
+    }else{
       lbimg.src=cell.dataset.src;
       lbimg.alt=cell.querySelector("img").alt;
-      lbcap.textContent=cell.querySelector(".cell__cap").textContent;
-      lb.dataset.open="true"; lbx.focus();
-    });
+    }
+    lbcap.textContent=cell.querySelector(".cell__cap").textContent;
+    lb.dataset.open="true"; lbx.focus();
   });
-  function closeLB(){ lb.dataset.open="false"; if(last) last.focus(); }
+  function closeLB(){
+    lb.dataset.open="false"; if(last) last.focus();
+    lbvid.pause(); lbvid.removeAttribute("src"); lbvid.load();
+  }
   lbx.addEventListener("click",closeLB);
   lb.addEventListener("click",function(e){ if(e.target===lb) closeLB(); });
   addEventListener("keydown",function(e){
@@ -1315,5 +1625,303 @@ img{display:block;max-width:100%}
         "linear-gradient(150deg,var(--gunmetal),var(--surface-2))";
     });
   });
+})();
+
+</script>
+
+<script>
+/* ============================================================
+   THE MACHINE — morph orchestration + pointer steering
+   Two independent systems, deliberately decoupled:
+   1. the morph  : CSS transitions, fired by a data-attribute
+   2. the steer  : rAF lerp on transforms only, 60fps, no layout
+   ============================================================ */
+(function(){
+  "use strict";
+  var stage=document.getElementById("stage");
+  if(!stage) return;
+
+  var RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var rig=document.getElementById("rig"),
+      btn=document.getElementById("morphBtn"),
+      label=document.getElementById("morphLabel"),
+      sheen=document.getElementById("sheen"),
+      sparks=document.getElementById("sparks"),
+      shadow=document.getElementById("shadow"),
+      glow=document.getElementById("glow"),
+      heat=document.getElementById("heat"),
+      steers=[].slice.call(stage.querySelectorAll(".steer"));
+
+  var MORPH_MS=2400;   /* longest part delay + duration */
+  var busy=false;
+
+  /* ---------- reduced motion: present the end state, stop ---------- */
+  if(RM){
+    stage.dataset.form="bike";
+    glow.setAttribute("opacity",".5");
+    return;
+  }
+
+  /* ---------- specular sweep: one pass across the body ---------- */
+  function sweep(){
+    sheen.animate(
+      [{transform:"translateX(0px)",opacity:0},
+       {transform:"translateX(700px)",opacity:.9,offset:.5},
+       {transform:"translateX(1600px)",opacity:0}],
+      {duration:1500,easing:"cubic-bezier(0.23,1,0.32,1)",delay:400}
+    );
+  }
+
+  /* ---------- spark burst: the moment it locks together ---------- */
+  var NS="http://www.w3.org/2000/svg";
+  function burst(){
+    for(var i=0;i<26;i++){
+      (function(i){
+        var c=document.createElementNS(NS,"circle");
+        var a=Math.random()*Math.PI*2, d=40+Math.random()*130;
+        c.setAttribute("cx",415); c.setAttribute("cy",372);
+        c.setAttribute("r",1+Math.random()*2.6);
+        c.setAttribute("fill",i%4?"#7CE800":"#F2F0ED");
+        sparks.appendChild(c);
+        var an=c.animate(
+          [{transform:"translate(0,0) scale(1)",opacity:1},
+           {transform:"translate("+Math.cos(a)*d+"px,"+(Math.sin(a)*d+34)+"px) scale(0)",opacity:0}],
+          {duration:620+Math.random()*520,easing:"cubic-bezier(0.23,1,0.32,1)"}
+        );
+        an.onfinish=function(){ c.remove(); };
+      })(i);
+    }
+  }
+
+  /* ---------- the morph ---------- */
+  function setForm(form){
+    if(busy) return;
+    busy=true;
+    stage.dataset.form=form;
+    label.textContent = form==="bike" ? "Revert" : "Transform";
+    sweep();
+
+    if(form==="bike"){
+      glow.animate([{opacity:0},{opacity:.5}],{duration:900,delay:1500,fill:"forwards"});
+      heat.animate([{opacity:0},{opacity:1}],{duration:900,delay:1700,fill:"forwards"});
+      setTimeout(burst,MORPH_MS-560);
+    }else{
+      glow.animate([{opacity:.5},{opacity:0}],{duration:500,fill:"forwards"});
+      heat.animate([{opacity:1},{opacity:0}],{duration:500,fill:"forwards"});
+    }
+    setTimeout(function(){busy=false;},MORPH_MS);
+  }
+
+  btn.addEventListener("click",function(){
+    setForm(stage.dataset.form==="bike" ? "robot" : "bike");
+  });
+
+  /* ---------- trigger: transform when it enters view, once ---------- */
+  var seen=false;
+  new IntersectionObserver(function(en,obs){
+    en.forEach(function(e){
+      if(e.isIntersecting && !seen){
+        seen=true;
+        setTimeout(function(){ setForm("bike"); },700);
+        obs.disconnect();
+      }
+    });
+  },{threshold:.35}).observe(stage);
+
+  /* ---------- steering: lerp toward the pointer, never snap ---------- */
+  var tx=0,ty=0,cx=0,cy=0,raf=null,idle=0;
+  var CAN_HOVER=matchMedia("(hover:hover) and (pointer:fine)").matches;
+
+  var YAW=18, LEAN=7, PITCH=8, STEER=13;   /* believable limits */
+
+  function apply(){
+    /* the whole machine yaws toward the cursor and leans into the turn */
+    rig.style.transform=
+      "rotateY("+(cx*YAW)+"deg) rotateX("+(-cy*PITCH)+"deg) rotateZ("+(cx*LEAN)+"deg)";
+
+    /* front wheel + bars steer harder than the body — that's what sells it */
+    if(stage.dataset.form==="bike"){
+      var s="rotate("+(cx*STEER)+"deg)";
+      for(var i=0;i<steers.length;i++) steers[i].style.transform=s;
+    }
+
+    /* shadow tracks the lean and tightens as the machine lifts */
+    var lift=Math.max(0,-cy);
+    shadow.setAttribute("cx",410+cx*46);
+    shadow.setAttribute("rx",215-lift*40);
+    shadow.setAttribute("opacity",(1-lift*.35).toFixed(3));
+  }
+
+  function tick(){
+    cx+=(tx-cx)*0.07;  cy+=(ty-cy)*0.07;   /* spring-ish, not instant */
+    apply();
+    var moving=Math.abs(tx-cx)>0.0008||Math.abs(ty-cy)>0.0008;
+    raf = moving ? requestAnimationFrame(tick) : null;
+  }
+  function kick(){ if(!raf) raf=requestAnimationFrame(tick); }
+
+  if(CAN_HOVER){
+    addEventListener("pointermove",function(e){
+      tx=(e.clientX/innerWidth-.5)*2;
+      ty=(e.clientY/innerHeight-.5)*2;
+      kick();
+    },{passive:true});
+  }else{
+    /* touch: no cursor to chase, so the machine sways on its own */
+    var gyro=false;
+    addEventListener("deviceorientation",function(e){
+      if(e.gamma==null) return;
+      gyro=true;
+      tx=Math.max(-1,Math.min(1,e.gamma/32));
+      ty=Math.max(-1,Math.min(1,((e.beta||45)-45)/40));
+      kick();
+    },{passive:true});
+    (function sway(t){
+      if(!gyro){ tx=Math.sin(t/2600)*.5; ty=Math.sin(t/3900)*.25; kick(); }
+      requestAnimationFrame(sway);
+    })(0);
+  }
+})();
+</script>
+
+<script>
+/* ============================================================
+   GALLERY — photos come from a source, not from this file.
+
+   Swap SOURCE below to change where photos live. Everything
+   downstream (filters, lightbox, layout) stays identical.
+
+   IMPORTANT: this file is public. Anything a key here can do,
+   a visitor can do too. Only ever put PUBLIC / read-only keys
+   in here — never an API secret.
+   ============================================================ */
+(function(){
+  "use strict";
+
+  var SOURCE = "repo";        /* "repo" | "cloudinary" | "supabase" */
+
+  var CONFIG = {
+    cloudinary:{ cloud:"YOUR_CLOUD_NAME", tag:"katte" },
+    supabase:{ url:"https://YOUR_PROJECT.supabase.co", anonKey:"YOUR_ANON_KEY", bucket:"gallery" }
+  };
+
+  /* ---------- sources: each returns [{full,thumb,cat,title,alt,size}] ---------- */
+  var SOURCES = {
+
+    /* photos committed to /images in this repo, listed in gallery.json */
+    repo: function(){
+      return fetch("gallery.json",{cache:"no-cache"})
+        .then(function(r){ if(!r.ok) throw new Error("gallery.json "+r.status); return r.json(); })
+        .then(function(d){
+          return d.photos.map(function(p){
+            return { full:p.src, thumb:p.src, cat:p.cat, title:p.title, alt:p.alt||p.title, size:p.size, type:p.type||"image" };
+          });
+        });
+    },
+
+    /* Cloudinary — public tag listing, no key needed.
+       Enable: Settings > Security > untick "Resource list".
+       Tag every photo "katte" on upload. */
+    cloudinary: function(){
+      var c=CONFIG.cloudinary;
+      return fetch("https://res.cloudinary.com/"+c.cloud+"/image/list/"+c.tag+".json")
+        .then(function(r){ if(!r.ok) throw new Error("cloudinary "+r.status); return r.json(); })
+        .then(function(d){
+          var base="https://res.cloudinary.com/"+c.cloud+"/image/upload/";
+          return d.resources.map(function(r){
+            var id=r.public_id+"."+r.format;
+            return {
+              /* Cloudinary resizes on delivery — phones upload 4MB, visitors get ~80KB */
+              full:  base+"f_auto,q_auto,w_1400/"+id,
+              thumb: base+"f_auto,q_auto,w_700/"+id,
+              cat:  (r.context&&r.context.custom&&r.context.custom.cat)  || "meets",
+              title:(r.context&&r.context.custom&&r.context.custom.caption) || r.public_id,
+              alt:  (r.context&&r.context.custom&&r.context.custom.caption) || "Club photo",
+              size: (r.context&&r.context.custom&&r.context.custom.size) || ""
+            };
+          });
+        });
+    },
+
+    /* Supabase — anon key is safe to publish IF Row Level Security is on.
+       Bucket public-read, insert restricted to signed-in members. */
+    supabase: function(){
+      var s=CONFIG.supabase;
+      return fetch(s.url+"/rest/v1/photos?select=*&order=taken_at.desc",
+        { headers:{ apikey:s.anonKey, Authorization:"Bearer "+s.anonKey } })
+        .then(function(r){ if(!r.ok) throw new Error("supabase "+r.status); return r.json(); })
+        .then(function(rows){
+          var base=s.url+"/storage/v1/object/public/"+s.bucket+"/";
+          return rows.map(function(r){
+            return { full:base+r.path, thumb:base+r.path, cat:r.cat,
+                     title:r.caption, alt:r.caption||"Club photo", size:r.size };
+          });
+        });
+    }
+  };
+
+  /* ---------- render ---------- */
+  var bento=document.getElementById("bento"),
+      state=document.getElementById("galState");
+  if(!bento) return;
+
+  var note=bento.querySelector(".cell--note");
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  var LABEL={ghats:"Ghats",night:"Night",meets:"Meetups",charity:"Charity",bikes:"Bikes"};
+
+  function render(photos){
+    if(!photos.length){
+      state.textContent="No photos yet. Add the first one and it shows up here.";
+      bento.setAttribute("aria-busy","false"); return;
+    }
+    var html="";
+    photos.forEach(function(p,i){
+      /* the note tile sits third; rhythm comes from the data, not hand-placed */
+      if(i===2 && note) html+=note.outerHTML;
+      var cls="cell"+(p.size==="wide"?" cell--w2":p.size==="big"?" cell--w2 cell--h2":"");
+      var isVideo=p.type==="video";
+      var media = isVideo
+        ? '<video src="'+esc(p.thumb)+'" muted loop playsinline preload="metadata"></video><span class="cell__play" aria-hidden="true"></span>'
+        : '<img src="'+esc(p.thumb)+'" alt="'+esc(p.alt)+'" loading="lazy" decoding="async">';
+      html+='<button class="'+cls+'" data-cat="'+esc(p.cat)+'" data-src="'+esc(p.full)+'" data-type="'+(isVideo?"video":"image")+'">'+
+              media+
+              '<span class="cell__cap"><small>'+esc(LABEL[p.cat]||p.cat)+'</small>'+esc(p.title)+'</span>'+
+            '</button>';
+    });
+    if(photos.length<3 && note) html+=note.outerHTML;
+    bento.innerHTML=html;
+    bento.setAttribute("aria-busy","false");
+    state.hidden=true;
+    if(window.__applyFilter) window.__applyFilter();
+
+    /* video cells: play the muted preview only while actually hovered/focused —
+       cheap on battery, and stays honest with prefers-reduced-motion */
+    if(!matchMedia("(prefers-reduced-motion: reduce)").matches){
+      bento.querySelectorAll(".cell video").forEach(function(v){
+        var cell=v.closest(".cell");
+        cell.addEventListener("mouseenter",function(){ v.play().catch(function(){}); });
+        cell.addEventListener("mouseleave",function(){ v.pause(); v.currentTime=0; });
+      });
+    }
+
+    bento.querySelectorAll("img").forEach(function(img){
+      img.addEventListener("error",function(){
+        img.style.display="none";
+        img.parentElement.style.background="linear-gradient(150deg,var(--gunmetal),var(--surface-2))";
+      });
+    });
+  }
+
+  (SOURCES[SOURCE]||SOURCES.repo)()
+    .then(render)
+    .catch(function(err){
+      console.error("Gallery source failed:",err);
+      bento.setAttribute("aria-busy","false");
+      /* an empty screen is an invitation to act, not a dead end */
+      state.textContent="Couldn't load photos. Check gallery.json is in the repo root.";
+    });
 })();
 </script>
