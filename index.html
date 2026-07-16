@@ -5,6 +5,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;600&display=swap" rel="stylesheet">
 
+<!-- 3D hero — scoped to #hero-robot-container, cannot collide with the styles below -->
+<link rel="stylesheet" href="css/hero3d.css">
+
 <style>
 /* ============================================================
    BIKERS KATTE — design tokens
@@ -765,6 +768,10 @@ img{display:block;max-width:100%}
   </div>
 
   <div class="hero__art">
+    <!-- 3D hero mounts here. If WebGL is unavailable the SVG machine below
+         stays visible and nothing changes. See /js/hero3d.js -->
+    <div id="hero-robot-container"></div>
+
     <div class="stage" id="stage" data-form="robot">
       <div class="rig" id="rig">
         <svg id="mech" viewBox="140 62 540 516" preserveAspectRatio="xMidYMid meet" role="img"
@@ -1925,3 +1932,19 @@ img{display:block;max-width:100%}
     });
 })();
 </script>
+
+<!-- ============================================================
+     3D HERO — loads last, as a module, so it never blocks the page.
+     If any of this fails the site is completely unaffected: the SVG
+     machine in .hero__art is the fallback and is already on screen.
+     ============================================================ -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.185.1/examples/jsm/",
+    "gsap": "https://unpkg.com/gsap@3.15.0/index.js"
+  }
+}
+</script>
+<script type="module" src="js/hero3d.js"></script>
