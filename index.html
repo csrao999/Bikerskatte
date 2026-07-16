@@ -1,0 +1,1319 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bikers Katte — Ride Together. Live Free.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   BIKERS KATTE — design tokens
+   Accent: burnt orange, LOCKED, single accent for whole page.
+   Crimson #C62828 is reserved ONLY for emergency/SOS semantics.
+   Radius: 2px everywhere (machined, not rounded-2xl slop).
+   ============================================================ */
+:root{
+  --bg:#0E0E10;            /* not pure #000 — avoids OLED smear */
+  --surface:#161719;
+  --surface-2:#1F2124;
+  --gunmetal:#2C2E32;
+  --ink:#F2F0ED;
+  --muted:#9A9BA0;         /* 6.6:1 on --bg */
+  --accent:#FF6A00;
+  --accent-dim:#C24E00;
+  --emergency:#C62828;     /* semantic only, never decorative */
+  --line:rgba(242,240,237,.13);
+  --r:2px;
+
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --ease-in-out:cubic-bezier(0.77,0,0.175,1);
+  /* ease-in is never used. It delays the moment the eye is watching. */
+
+  --shell:1360px;
+  --pad:clamp(20px,5vw,64px);
+
+  --display:"Barlow Condensed",system-ui,sans-serif;
+  --body:"Barlow",system-ui,sans-serif;
+  --kn:"Noto Sans Kannada","Barlow",sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--body);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+:lang(kn){font-family:var(--kn);line-height:1.75}
+
+h1,h2,h3{
+  font-family:var(--display);font-weight:700;
+  text-transform:uppercase;letter-spacing:.005em;
+  line-height:.92;margin:0;
+}
+p{margin:0}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+
+.shell{max-width:var(--shell);margin:0 auto;padding-inline:var(--pad)}
+
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:var(--r)}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  min-height:48px;padding:0 26px;border:0;border-radius:var(--r);
+  font-family:var(--display);font-size:17px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;
+  cursor:pointer;transition:background 180ms var(--ease-out),
+    color 180ms var(--ease-out),transform 120ms var(--ease-out),
+    border-color 180ms var(--ease-out);
+}
+.btn:active{transform:scale(.97)}   /* instant physical feedback */
+/* near-black on orange = 6.2:1. White on orange = 3.1:1 → banned. */
+.btn--primary{background:var(--accent);color:#0E0E10}
+.btn--primary:hover{background:#FF7E22}
+.btn--ghost{
+  background:transparent;color:var(--ink);
+  box-shadow:inset 0 0 0 1px rgba(242,240,237,.28);
+}
+.btn--ghost:hover{box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent)}
+
+/* ---------- nav — single line, 68px ---------- */
+.nav{
+  position:fixed;inset:0 0 auto;z-index:60;height:68px;
+  display:flex;align-items:center;
+  background:rgba(14,14,16,.6);
+  backdrop-filter:blur(14px) saturate(1.4);
+  -webkit-backdrop-filter:blur(14px) saturate(1.4);
+  border-bottom:1px solid transparent;
+  transition:background 220ms var(--ease-out),border-color 220ms var(--ease-out);
+}
+.nav[data-stuck="true"]{background:rgba(14,14,16,.92);border-bottom-color:var(--line)}
+@supports not (backdrop-filter:blur(1px)){.nav{background:rgba(14,14,16,.95)}}
+.nav__in{display:flex;align-items:center;gap:28px;width:100%}
+
+.brand{display:flex;align-items:baseline;gap:9px;margin-right:auto}
+.brand__mark{
+  font-family:var(--display);font-size:23px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.02em;
+}
+.brand__mark em{color:var(--accent);font-style:normal}
+.brand__kn{font-family:var(--kn);font-size:12px;color:var(--muted);letter-spacing:0}
+
+.nav__links{display:flex;gap:26px;list-style:none;margin:0;padding:0}
+.nav__links a{
+  font-family:var(--display);font-size:16px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.09em;color:var(--muted);
+  padding:6px 0;position:relative;transition:color 180ms var(--ease-out);
+}
+.nav__links a::after{
+  content:"";position:absolute;left:0;bottom:0;height:1.5px;width:100%;
+  background:var(--accent);transform:scaleX(0);transform-origin:left;
+  transition:transform 220ms var(--ease-out);
+}
+.nav__links a:hover{color:var(--ink)}
+.nav__links a:hover::after{transform:scaleX(1)}
+
+.lang{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.lang button{
+  background:transparent;border:0;cursor:pointer;color:var(--muted);
+  padding:7px 11px;font-size:12px;font-weight:600;font-family:var(--body);
+  min-height:34px;
+  /* no transition: language switch is a control, not a moment */
+}
+.lang button[aria-pressed="true"]{background:var(--accent);color:#0E0E10}
+.lang button:nth-child(2){font-family:var(--kn)}
+
+.burger{
+  display:none;background:transparent;border:1px solid var(--line);
+  border-radius:var(--r);width:44px;height:44px;cursor:pointer;
+  color:var(--ink);align-items:center;justify-content:center;
+}
+.sheet{
+  position:fixed;inset:68px 0 auto;z-index:55;background:rgba(14,14,16,.98);
+  border-bottom:1px solid var(--line);padding:16px var(--pad) 26px;
+  display:none;
+}
+.sheet[data-open="true"]{display:block}
+.sheet ul{list-style:none;margin:0;padding:0;
+  display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.sheet a{
+  display:block;padding:13px 4px;font-family:var(--display);font-size:18px;
+  text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+  border-bottom:1px solid var(--line);
+}
+.sheet a:hover{color:var(--accent)}
+
+/* ---------- hero — split, left-aligned (anti-center bias) ---------- */
+.hero{
+  position:relative;min-height:100dvh;   /* never h-screen */
+  display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:clamp(24px,4vw,64px);
+  padding-top:120px;padding-bottom:64px;  /* under the pt-24 desktop cap */
+  overflow:hidden;
+}
+.fog{position:absolute;inset:-20%;z-index:0;pointer-events:none;opacity:.5}
+.fog span{
+  position:absolute;border-radius:50%;filter:blur(90px);
+  will-change:transform;
+}
+.fog span:nth-child(1){
+  width:52vw;height:52vw;left:-8%;top:8%;
+  background:radial-gradient(circle,rgba(255,106,0,.20),transparent 68%);
+  animation:drift 34s var(--ease-in-out) infinite alternate;
+}
+.fog span:nth-child(2){
+  width:44vw;height:44vw;right:-6%;bottom:-6%;
+  background:radial-gradient(circle,rgba(120,130,145,.16),transparent 68%);
+  animation:drift 44s var(--ease-in-out) infinite alternate-reverse;
+}
+@keyframes drift{
+  from{transform:translate3d(0,0,0) scale(1)}
+  to{transform:translate3d(5vw,-4vh,0) scale(1.14)}
+}
+
+.hero__copy{position:relative;z-index:2;max-width:min(20ch,560px)}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:9px;margin-bottom:22px;
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.2em;
+  color:var(--accent);
+}
+.eyebrow::before{content:"";width:26px;height:1.5px;background:var(--accent)}
+
+.hero h1{
+  font-size:clamp(56px,8.4vw,124px);
+  letter-spacing:-.012em;margin-bottom:24px;line-height:1.15;
+}
+.hero h1 .ln{display:block;overflow:hidden;padding:.14em 0 .18em;margin-top:-.08em}
+.hero h1 .ln > span{display:block;transform:translateY(105%)}
+.hero h1 em{color:var(--accent);font-style:normal}
+
+.hero__sub{
+  color:var(--muted);font-size:clamp(15px,1.35vw,18px);
+  max-width:44ch;margin-bottom:34px;
+}
+.hero__sub b{color:var(--ink);font-weight:600}
+.hero__cta{display:flex;gap:12px;flex-wrap:wrap}
+
+/* hero collage */
+.hero__art{position:relative;z-index:1;height:min(76vh,660px)}
+.plate{
+  position:absolute;border-radius:var(--r);overflow:hidden;
+  background:var(--surface-2);
+  box-shadow:0 30px 70px -20px rgba(0,0,0,.85);
+  will-change:transform;
+}
+.plate img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.06)}
+/* duotone: unifies mixed photography into one voice */
+.plate::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(150deg,rgba(255,106,0,.44),rgba(14,14,16,.72));
+  mix-blend-mode:color;
+}
+.plate::before{
+  content:"";position:absolute;inset:0;z-index:2;
+  box-shadow:inset 0 0 0 1px rgba(242,240,237,.14);
+}
+.plate--a{left:4%;top:2%;width:62%;height:66%}
+.plate--b{right:0;top:24%;width:50%;height:52%}
+.plate--c{left:16%;bottom:0;width:44%;height:30%}
+
+.stamp{
+  position:absolute;right:2%;top:12%;z-index:5;
+  background:var(--accent);color:#0E0E10;border-radius:var(--r);
+  padding:9px 13px;font-family:var(--display);font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;font-size:14px;line-height:1.15;
+  text-align:center;
+}
+.stamp small{display:block;font-size:10px;letter-spacing:.14em;opacity:.75}
+
+.scroll-hint{
+  position:absolute;left:var(--pad);bottom:26px;z-index:3;
+  display:flex;align-items:center;gap:11px;
+  font-size:10px;font-weight:600;letter-spacing:.22em;color:var(--muted);
+  text-transform:uppercase;
+}
+.scroll-hint i{
+  display:block;width:1px;height:34px;background:var(--line);position:relative;overflow:hidden;
+}
+.scroll-hint i::after{
+  content:"";position:absolute;inset:0;background:var(--accent);
+  animation:trickle 2.1s var(--ease-in-out) infinite;
+}
+@keyframes trickle{
+  0%{transform:translateY(-100%)}
+  55%,100%{transform:translateY(100%)}
+}
+
+/* ---------- ledger (stats) — rules, not cards ---------- */
+.ledger{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface)}
+.ledger__grid{
+  display:grid;grid-template-columns:repeat(6,1fr);
+}
+.stat{padding:38px 22px;border-left:1px solid var(--line)}
+.stat:first-child{border-left:0}
+.stat__n{
+  font-family:var(--display);font-size:clamp(30px,3.1vw,46px);font-weight:700;
+  line-height:1;letter-spacing:-.01em;
+}
+.stat__n em{color:var(--accent);font-style:normal}
+.stat__l{
+  margin-top:9px;font-size:10.5px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--muted);
+}
+
+/* ---------- leadership ---------- */
+.lead{border-bottom:1px solid var(--line);background:var(--bg)}
+.lead__grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+}
+.leader{
+  padding:32px var(--pad);border-left:1px solid var(--line);
+  display:flex;align-items:center;gap:18px;
+}
+.leader:first-child{border-left:0}
+.leader__ring{
+  width:56px;height:56px;flex:0 0 auto;border-radius:50%;
+  display:grid;place-items:center;font-family:var(--display);font-weight:700;
+  font-size:20px;color:#0E0E10;background:var(--accent);
+  box-shadow:0 0 0 3px var(--bg),0 0 0 4px rgba(255,106,0,.4);
+}
+.leader__role{
+  font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:4px;
+}
+.leader__name{
+  font-family:var(--display);font-size:24px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.02em;
+}
+
+/* ---------- creed — full-bleed manifesto ---------- */
+.creed{padding:clamp(88px,11vw,150px) 0}
+.creed__q{
+  font-family:var(--display);font-weight:600;text-transform:uppercase;
+  font-size:clamp(34px,5.4vw,84px);line-height:1;letter-spacing:-.012em;
+  max-width:17ch;
+}
+.creed__q em{color:var(--accent);font-style:normal}
+.creed__body{
+  margin-top:44px;display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--line);border-block:1px solid var(--line);
+}
+.creed__cell{background:var(--bg);padding:30px 26px 34px}
+.creed__cell h3{font-size:21px;letter-spacing:.03em;margin-bottom:11px}
+.creed__cell p{color:var(--muted);font-size:14.5px}
+.creed__cell .num{
+  font-family:var(--display);font-size:12px;color:var(--accent);
+  letter-spacing:.16em;display:block;margin-bottom:16px;
+}
+
+/* ---------- section heading ---------- */
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:38px}
+.head h2{font-size:clamp(32px,4.4vw,62px);letter-spacing:-.008em}
+.head p{color:var(--muted);font-size:14.5px;max-width:38ch}
+
+/* ---------- rides — timeline ---------- */
+.rides{padding:clamp(72px,9vw,120px) 0;background:var(--surface);border-top:1px solid var(--line)}
+.tl{list-style:none;margin:0;padding:0}
+.ride{
+  display:grid;grid-template-columns:150px 1fr auto;gap:clamp(16px,3vw,44px);
+  align-items:center;padding:26px 0;border-top:1px solid var(--line);
+  position:relative;transition:background 200ms var(--ease-out);
+}
+.ride:last-child{border-bottom:1px solid var(--line)}
+.ride::before{
+  content:"";position:absolute;left:calc(var(--pad) * -1);right:calc(var(--pad) * -1);
+  top:0;bottom:0;background:rgba(255,106,0,.045);opacity:0;
+  transition:opacity 200ms var(--ease-out);pointer-events:none;
+}
+.ride:hover::before{opacity:1}
+.ride__date{
+  font-family:var(--display);font-size:34px;font-weight:700;line-height:.95;
+}
+.ride__date span{display:block;font-size:11px;letter-spacing:.18em;color:var(--muted)}
+.ride__main h3{font-size:26px;letter-spacing:.02em;margin-bottom:8px;
+  transition:color 200ms var(--ease-out)}
+.ride:hover .ride__main h3{color:var(--accent)}
+.ride__meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:12.5px}
+.ride__meta b{color:var(--ink);font-weight:600}
+.tag{
+  border-radius:var(--r);padding:3px 9px;font-size:10px;font-weight:600;
+  letter-spacing:.13em;text-transform:uppercase;
+  box-shadow:inset 0 0 0 1px var(--line);color:var(--muted);
+}
+.tag[data-lvl="hard"]{color:var(--accent);box-shadow:inset 0 0 0 1px rgba(255,106,0,.45)}
+.seats{font-size:12px;color:var(--muted);text-align:right;margin-bottom:9px}
+.seats b{color:var(--ink)}
+
+/* ---------- gallery — bento, varied cells ---------- */
+.gal{padding:clamp(72px,9vw,120px) 0}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:26px}
+.chip{
+  background:transparent;border:0;box-shadow:inset 0 0 0 1px var(--line);
+  border-radius:var(--r);color:var(--muted);cursor:pointer;
+  padding:9px 15px;min-height:38px;font-family:var(--body);
+  font-size:11.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;
+  transition:color 160ms var(--ease-out),box-shadow 160ms var(--ease-out),
+    background 160ms var(--ease-out);
+}
+.chip:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(242,240,237,.32)}
+.chip[aria-pressed="true"]{background:var(--accent);color:#0E0E10;box-shadow:none}
+.chip:active{transform:scale(.97)}
+
+.bento{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  grid-auto-rows:170px;gap:10px;
+}
+.cell{
+  position:relative;overflow:hidden;border-radius:var(--r);
+  background:var(--surface-2);cursor:pointer;border:0;padding:0;
+  transition:opacity 260ms var(--ease-out),transform 260ms var(--ease-out);
+}
+.cell img{width:100%;height:100%;object-fit:cover;
+  filter:grayscale(1) contrast(1.05);
+  transition:transform 420ms var(--ease-out),filter 300ms var(--ease-out)}
+.cell::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(160deg,rgba(255,106,0,.40),rgba(14,14,16,.70));
+  mix-blend-mode:color;transition:opacity 300ms var(--ease-out);
+}
+.cell:hover img{transform:scale(1.05);filter:grayscale(0) contrast(1)}
+.cell:hover::after{opacity:.25}
+.cell__cap{
+  position:absolute;left:0;right:0;bottom:0;z-index:3;text-align:left;
+  padding:34px 14px 12px;
+  background:linear-gradient(to top,rgba(14,14,16,.92),transparent);
+  font-family:var(--display);font-size:15px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.07em;color:var(--ink);
+}
+.cell__cap small{
+  display:block;font-family:var(--body);font-size:10px;letter-spacing:.14em;
+  color:var(--accent);margin-bottom:3px;
+}
+.cell[hidden]{display:none}
+.cell--w2{grid-column:span 2}
+.cell--h2{grid-row:span 2}
+
+/* one cell is not a photo — grid needs material variety */
+.cell--note{
+  background:
+    linear-gradient(140deg,var(--accent) 0%,var(--accent-dim) 100%);
+  color:#0E0E10;padding:22px;display:flex;flex-direction:column;
+  justify-content:space-between;align-items:flex-start;text-align:left;
+  cursor:default;
+}
+.cell--note::after{display:none}
+.cell--note b{
+  font-family:var(--display);font-size:clamp(21px,2.1vw,30px);font-weight:700;
+  text-transform:uppercase;line-height:.98;letter-spacing:.01em;
+}
+.cell--note small{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.7}
+
+/* ---------- quotes — marquee ---------- */
+.quotes{
+  padding:clamp(64px,8vw,104px) 0;border-block:1px solid var(--line);
+  background:var(--surface);overflow:hidden;
+}
+.marq{display:flex;gap:0;width:max-content;
+  animation:slide 46s linear infinite}
+.marq:hover{animation-play-state:paused}
+.quotes:nth-of-type(n) .marq--b{animation-duration:58s;animation-direction:reverse;margin-top:10px}
+@keyframes slide{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+.qt{
+  flex:0 0 auto;padding:0 30px;border-left:1px solid var(--line);
+  font-family:var(--display);font-weight:600;text-transform:uppercase;
+  font-size:clamp(19px,2.1vw,29px);letter-spacing:.02em;color:var(--muted);
+  white-space:nowrap;transition:color 200ms var(--ease-out);
+}
+.qt:hover{color:var(--ink)}
+.qt--kn{
+  font-family:var(--kn);text-transform:none;font-weight:400;
+  font-size:clamp(15px,1.6vw,22px);color:var(--accent);
+}
+
+/* ---------- safety ---------- */
+.safety{padding:clamp(72px,9vw,120px) 0}
+.safe-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.safe{background:var(--bg);padding:24px 20px 28px;transition:background 200ms var(--ease-out)}
+.safe:hover{background:var(--surface-2)}
+.safe svg{width:22px;height:22px;stroke:var(--accent);fill:none;
+  stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:14px}
+.safe h3{font-size:17px;letter-spacing:.04em;margin-bottom:7px}
+.safe p{font-size:13px;color:var(--muted);line-height:1.55}
+
+.sos{
+  margin-top:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  border:1px solid rgba(198,40,40,.5);border-radius:var(--r);
+  background:rgba(198,40,40,.09);padding:16px 20px;
+}
+.sos__b{
+  font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.15em;
+  text-transform:uppercase;color:#FF6B6B;
+}
+.sos p{font-size:13.5px;color:var(--muted)}
+.sos b{color:var(--ink)}
+
+/* ---------- join ---------- */
+.join{
+  padding:clamp(84px,10vw,132px) 0;border-top:1px solid var(--line);
+  background:
+    radial-gradient(120% 150% at 82% 8%,rgba(255,106,0,.15),transparent 58%),
+    var(--surface);
+}
+.join__wrap{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,70px);align-items:start}
+.join h2{font-size:clamp(36px,5vw,74px);letter-spacing:-.01em;max-width:12ch}
+.join__kn{font-family:var(--kn);color:var(--accent);font-size:16px;margin-top:18px}
+.join__note{color:var(--muted);font-size:14px;margin-top:16px;max-width:40ch}
+
+.form{display:grid;gap:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:grid;gap:7px}
+.field label{
+  font-size:10.5px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--muted);   /* 6.6:1 — passes AA */
+}
+.field input,.field select,.field textarea{
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--r);
+  color:var(--ink);font-family:var(--body);font-size:15px;
+  padding:12px 14px;min-height:48px;width:100%;
+  transition:border-color 170ms var(--ease-out),background 170ms var(--ease-out);
+}
+.field textarea{min-height:96px;resize:vertical}
+.field input::placeholder,.field textarea::placeholder{color:#7C7D82}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--accent);background:var(--surface-2);
+}
+.field .hint{font-size:11.5px;color:var(--muted)}
+.err{font-size:11.5px;color:#FF6B6B;min-height:0}
+.field[data-invalid="true"] input{border-color:#FF6B6B}
+
+.done{
+  border:1px solid rgba(255,106,0,.4);background:rgba(255,106,0,.07);
+  border-radius:var(--r);padding:26px;text-align:left;
+}
+.done h3{color:var(--accent);font-size:24px;margin-bottom:9px}
+.done p{color:var(--muted);font-size:14px}
+
+/* ---------- footer ---------- */
+.foot{border-top:1px solid var(--line);padding:52px 0 34px}
+.foot__top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:34px;margin-bottom:44px}
+.foot h4{
+  font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.17em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 15px;
+}
+.foot ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.foot li a{font-size:13.5px;color:var(--muted);transition:color 160ms var(--ease-out)}
+.foot li a:hover{color:var(--accent)}
+.foot__blurb{color:var(--muted);font-size:13.5px;max-width:34ch;margin-top:14px}
+.foot__bottom{
+  border-top:1px solid var(--line);padding-top:22px;
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  font-size:12px;color:var(--muted);
+}
+.social{display:flex;gap:8px}
+.social a{
+  width:38px;height:38px;border-radius:var(--r);display:grid;place-items:center;
+  box-shadow:inset 0 0 0 1px var(--line);
+  transition:box-shadow 170ms var(--ease-out),color 170ms var(--ease-out);
+  color:var(--muted);
+}
+.social a:hover{box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent)}
+.social svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6}
+
+/* ---------- lightbox ---------- */
+.lb{
+  position:fixed;inset:0;z-index:90;display:none;place-items:center;
+  background:rgba(6,6,7,.94);padding:24px;
+}
+.lb[data-open="true"]{display:grid}
+.lb img{max-width:90vw;max-height:82vh;border-radius:var(--r);
+  /* never animate from scale(0) — nothing appears from nothing */
+  animation:pop 260ms var(--ease-out)}
+@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.lb__x{
+  position:absolute;top:20px;right:20px;width:44px;height:44px;
+  background:transparent;border:1px solid var(--line);border-radius:var(--r);
+  color:var(--ink);cursor:pointer;font-size:20px;
+}
+.lb__cap{margin-top:14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- toast ---------- */
+.toast{
+  position:fixed;left:50%;bottom:26px;z-index:95;
+  transform:translate(-50%,140%);
+  background:var(--ink);color:#0E0E10;border-radius:var(--r);
+  padding:13px 20px;font-weight:600;font-size:14px;
+  box-shadow:0 20px 50px -12px rgba(0,0,0,.8);
+  /* enters and exits the same direction — swipe-away stays intuitive */
+  transition:transform 300ms var(--ease-out);
+}
+.toast[data-show="true"]{transform:translate(-50%,0)}
+
+/* ---------- scroll progress ---------- */
+.prog{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:70;width:0;
+  transition:width 90ms linear}
+
+/* ---------- reveal ---------- */
+.rv{opacity:0;transform:translateY(18px);
+  transition:opacity 560ms var(--ease-out),transform 560ms var(--ease-out)}
+.rv.in{opacity:1;transform:none}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){
+  .nav__links{display:none}
+  .burger{display:flex}
+  .ledger__grid{grid-template-columns:repeat(3,1fr)}
+  .stat:nth-child(4){border-left:0}
+  .stat:nth-child(-n+3){border-bottom:1px solid var(--line)}
+  .safe-grid{grid-template-columns:repeat(2,1fr)}
+  .foot__top{grid-template-columns:1fr 1fr}
+}
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;padding-top:104px;min-height:auto}
+  .hero__copy{max-width:none}
+  .hero__art{height:52vh;min-height:330px;order:2}
+  .scroll-hint{display:none}
+  .creed__body{grid-template-columns:1fr}
+  .join__wrap{grid-template-columns:1fr}
+  .bento{grid-template-columns:repeat(2,1fr);grid-auto-rows:150px}
+  .ride{grid-template-columns:88px 1fr;row-gap:14px}
+  .ride__date{font-size:26px}
+  .ride > .ride__act{grid-column:1/-1;display:flex;align-items:center;
+    justify-content:space-between;gap:12px}
+  .seats{margin-bottom:0}
+  .head{flex-direction:column;align-items:flex-start;gap:12px}
+}
+@media (max-width:600px){
+  .ledger__grid{grid-template-columns:repeat(2,1fr)}
+  .stat{border-left:0;border-top:1px solid var(--line);padding:26px 16px}
+  .stat:nth-child(-n+3){border-bottom:0}
+  .stat:nth-child(odd){border-right:1px solid var(--line)}
+  .row{grid-template-columns:1fr}
+  .foot__top{grid-template-columns:1fr;gap:26px}
+  .sheet ul{grid-template-columns:1fr}
+  .cell--w2{grid-column:span 2}
+  .cell--h2{grid-row:span 1}
+  .lead__grid{grid-template-columns:1fr}
+  .leader{border-left:0;border-top:1px solid var(--line)}
+  .leader:first-child{border-top:0}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;scroll-behavior:auto !important;
+  }
+  .rv{opacity:1;transform:none}
+  .hero h1 .ln > span{transform:none}
+  .marq{animation:none;flex-wrap:wrap;width:auto}
+}
+@media (prefers-reduced-transparency:reduce){
+  .nav{background:rgba(14,14,16,.97);backdrop-filter:none}
+}
+</style>
+
+<div class="prog" id="prog" aria-hidden="true"></div>
+
+<!-- ===================== NAV ===================== -->
+<header class="nav" id="nav">
+  <div class="shell nav__in">
+    <a class="brand" href="#top" aria-label="Bikers Katte, home">
+      <span class="brand__mark">Bikers<em>Katte</em></span>
+      <span class="brand__kn" lang="kn">ಕಟ್ಟೆ</span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav__links">
+        <li><a href="#rides">Rides</a></li>
+        <li><a href="#bikes">Bikes</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#creed">The Katte</a></li>
+        <li><a href="#safety">Safety</a></li>
+      </ul>
+    </nav>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="kn" aria-pressed="false" lang="kn">ಕ</button>
+    </div>
+    <a class="btn btn--primary" href="#join" style="min-height:42px;padding:0 18px;font-size:15px">Join</a>
+    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="sheet">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M0 1h18M0 6h18M0 11h18"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<div class="sheet" id="sheet" data-open="false">
+  <ul>
+    <li><a href="#rides">Rides</a></li>
+    <li><a href="#bikes">Bikes</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#creed">The Katte</a></li>
+    <li><a href="#safety">Safety</a></li>
+    <li><a href="#join">Members</a></li>
+  </ul>
+</div>
+
+<!-- ===================== HERO ===================== -->
+<main id="top">
+<section class="hero shell">
+  <div class="fog" aria-hidden="true"><span></span><span></span></div>
+
+  <div class="hero__copy">
+    <span class="eyebrow">Bengaluru · Est. 2015</span>
+    <h1>
+      <span class="ln"><span>Ride</span></span>
+      <span class="ln"><span>Together.</span></span>
+      <span class="ln"><span><em>Live Free.</em></span></span>
+    </h1>
+    <p class="hero__sub" data-i18n="sub">
+      A <b>katte</b> is the stone platform where a village gathers to talk. Ours just happens to have engines parked around it.
+    </p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="#join">Join the Brotherhood</a>
+      <a class="btn btn--ghost" href="#rides">Upcoming Rides</a>
+    </div>
+  </div>
+
+  <div class="hero__art" aria-hidden="true">
+    <figure class="plate plate--a" data-depth="16">
+      <img src="https://picsum.photos/seed/katte-highway-dawn/900/700" alt="">
+    </figure>
+    <figure class="plate plate--b" data-depth="-22">
+      <img src="https://picsum.photos/seed/katte-ghat-curve/700/700" alt="">
+    </figure>
+    <figure class="plate plate--c" data-depth="30">
+      <img src="https://picsum.photos/seed/katte-group-stop/700/420" alt="">
+    </figure>
+    <div class="stamp" data-depth="-34">16<small>Members</small></div>
+  </div>
+
+  <div class="scroll-hint" aria-hidden="true"><i></i>Scroll</div>
+</section>
+
+<!-- ===================== LEDGER ===================== -->
+<section class="ledger" aria-label="Club numbers">
+  <div class="shell" style="padding-inline:0">
+    <div class="ledger__grid">
+      <div class="stat"><div class="stat__n"><span data-count="16">0</span></div><div class="stat__l" data-i18n="l-members">Members</div></div>
+      <div class="stat"><div class="stat__n"><span data-count="520">0</span><em>+</em></div><div class="stat__l" data-i18n="l-rides">Total Rides</div></div>
+      <div class="stat"><div class="stat__n"><span data-count="1850000" data-indian>0</span><em>+</em></div><div class="stat__l" data-i18n="l-km">Kilometres</div></div>
+      <div class="stat"><div class="stat__n"><span data-count="19">0</span></div><div class="stat__l" data-i18n="l-states">States Covered</div></div>
+      <div class="stat"><div class="stat__n"><span data-count="38">0</span></div><div class="stat__l" data-i18n="l-charity">Charity Rides</div></div>
+      <div class="stat"><div class="stat__n"><span data-count="10">0</span><em>+</em></div><div class="stat__l" data-i18n="l-years">Years Together</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LEADERSHIP ===================== -->
+<section class="lead" aria-label="Club leadership">
+  <div class="shell" style="padding-inline:0">
+    <div class="lead__grid">
+      <div class="leader">
+        <div class="leader__ring" aria-hidden="true">K</div>
+        <div>
+          <div class="leader__role">Captain</div>
+          <div class="leader__name">Kiran</div>
+        </div>
+      </div>
+      <div class="leader">
+        <div class="leader__ring" aria-hidden="true">S</div>
+        <div>
+          <div class="leader__role">Vice Captain</div>
+          <div class="leader__name">Shodan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CREED ===================== -->
+<section class="creed shell" id="creed">
+  <h2 class="creed__q rv">Four wheels move the body. <em>Two wheels move the soul.</em></h2>
+  <div class="creed__body">
+    <div class="creed__cell rv"><span class="num">01</span>
+      <h3 data-i18n="c1h">Ride Your Own Ride</h3>
+      <p data-i18n="c1p">No one is left behind and no one is pushed beyond their line. The slowest rider sets the pace, and that is not a compromise — it is the rule.</p>
+    </div>
+    <div class="creed__cell rv"><span class="num">02</span>
+      <h3 data-i18n="c2h">Gear Before Ego</h3>
+      <p data-i18n="c2p">Full-face, gloves, boots, spine. Every ride, every distance. There is no such thing as a short trip that deserves less protection.</p>
+    </div>
+    <div class="creed__cell rv"><span class="num">03</span>
+      <h3 data-i18n="c3h">The Road Is Shared</h3>
+      <p data-i18n="c3p">We ride staggered, we signal early, and we do not treat the ghats as a racetrack. The village you pass through has to live there tomorrow.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== RIDES ===================== -->
+<section class="rides" id="rides">
+  <div class="shell">
+    <div class="head rv">
+      <h2 data-i18n="ridesh">Upcoming Rides</h2>
+      <p data-i18n="ridesp">Flag-off from the katte at Cubbon Park, unless noted. Register by Thursday.</p>
+    </div>
+    <ul class="tl">
+      <li class="ride rv">
+        <div class="ride__date">18<span>Jul</span></div>
+        <div class="ride__main">
+          <h3>Muthathi Riverside Run</h3>
+          <div class="ride__meta">
+            <span><b>90</b> km</span><span>Flag-off <b>05:30</b></span>
+            <span>Captain <b>Kiran</b></span><span class="tag" data-lvl="easy">Easy</span>
+          </div>
+        </div>
+        <div class="ride__act">
+          <div class="seats"><b>16</b> of 16 riding</div>
+          <button class="btn btn--ghost" style="min-height:42px;font-size:15px" data-reg>Register</button>
+        </div>
+      </li>
+      <li class="ride rv">
+        <div class="ride__date">02<span>Aug</span></div>
+        <div class="ride__main">
+          <h3>Nandi Hills Sunrise</h3>
+          <div class="ride__meta">
+            <span><b>62</b> km</span><span>Flag-off <b>04:30</b></span>
+            <span>Captain <b>Ravi K.</b></span><span class="tag" data-lvl="easy">Easy</span>
+          </div>
+        </div>
+        <div class="ride__act">
+          <div class="seats"><b>12</b> of 40 seats left</div>
+          <button class="btn btn--ghost" style="min-height:42px;font-size:15px" data-reg>Register</button>
+        </div>
+      </li>
+      <li class="ride rv">
+        <div class="ride__date">16<span>Aug</span></div>
+        <div class="ride__main">
+          <h3>Kolli Hills — 70 Hairpins</h3>
+          <div class="ride__meta">
+            <span><b>385</b> km</span><span>Flag-off <b>05:00</b></span>
+            <span>Captain <b>Nisha D.</b></span><span class="tag" data-lvl="hard">Hard</span>
+          </div>
+        </div>
+        <div class="ride__act">
+          <div class="seats"><b>4</b> of 24 seats left</div>
+          <button class="btn btn--ghost" style="min-height:42px;font-size:15px" data-reg>Register</button>
+        </div>
+      </li>
+      <li class="ride rv">
+        <div class="ride__date">30<span>Aug</span></div>
+        <div class="ride__main">
+          <h3>Coorg Monsoon Run</h3>
+          <div class="ride__meta">
+            <span><b>265</b> km</span><span>Flag-off <b>05:30</b></span>
+            <span>Captain <b>Imran S.</b></span><span class="tag" data-lvl="mid">Moderate</span>
+          </div>
+        </div>
+        <div class="ride__act">
+          <div class="seats"><b>19</b> of 30 seats left</div>
+          <button class="btn btn--ghost" style="min-height:42px;font-size:15px" data-reg>Register</button>
+        </div>
+      </li>
+      <li class="ride rv">
+        <div class="ride__date">13<span>Sep</span></div>
+        <div class="ride__main">
+          <h3>Mysore Charity Run — Blood Drive</h3>
+          <div class="ride__meta">
+            <span><b>145</b> km</span><span>Flag-off <b>06:00</b></span>
+            <span>Captain <b>Deepa R.</b></span><span class="tag" data-lvl="easy">Easy</span>
+          </div>
+        </div>
+        <div class="ride__act">
+          <div class="seats"><b>28</b> of 60 seats left</div>
+          <button class="btn btn--ghost" style="min-height:42px;font-size:15px" data-reg>Register</button>
+        </div>
+      </li>
+    </ul>
+
+    <div class="head rv" style="margin-top:56px">
+      <h2 style="font-size:clamp(26px,3.2vw,40px)">Previous Rides</h2>
+      <p style="color:var(--muted);font-size:14.5px">Roads already behind us.</p>
+    </div>
+    <ul class="tl">
+      <li class="ride rv" style="opacity:.72">
+        <div class="ride__date" style="color:var(--muted)">—<span>Done</span></div>
+        <div class="ride__main">
+          <h3 style="color:var(--muted)">Coorg – Virajpet</h3>
+          <div class="ride__meta"><span class="tag">Completed</span></div>
+        </div>
+      </li>
+      <li class="ride rv" style="opacity:.72">
+        <div class="ride__date" style="color:var(--muted)">—<span>Done</span></div>
+        <div class="ride__main">
+          <h3 style="color:var(--muted)">Valparai</h3>
+          <div class="ride__meta"><span class="tag">Completed</span></div>
+        </div>
+      </li>
+      <li class="ride rv" style="opacity:.72">
+        <div class="ride__date" style="color:var(--muted)">—<span>Done</span></div>
+        <div class="ride__main">
+          <h3 style="color:var(--muted)">Wayanad</h3>
+          <div class="ride__meta"><span class="tag">Completed</span></div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== GALLERY ===================== -->
+<section class="gal shell" id="gallery">
+  <div class="head rv">
+    <h2 data-i18n="galh">From the Road</h2>
+    <p data-i18n="galp">Ten years of dawn starts, roadside chai, and bikes that refused to start in Chikmagalur.</p>
+  </div>
+
+  <div class="filters rv" role="group" aria-label="Filter gallery">
+    <button class="chip" data-f="all" aria-pressed="true">All</button>
+    <button class="chip" data-f="ghats" aria-pressed="false">Ghats</button>
+    <button class="chip" data-f="night" aria-pressed="false">Night Rides</button>
+    <button class="chip" data-f="meets" aria-pressed="false">Meetups</button>
+    <button class="chip" data-f="charity" aria-pressed="false">Charity</button>
+  </div>
+
+  <div class="bento rv" id="bento">
+    <button class="cell cell--w2 cell--h2" data-cat="ghats" data-src="https://picsum.photos/seed/katte-ghat-1/1200/1000">
+      <img src="https://picsum.photos/seed/katte-ghat-1/900/760" alt="Riders on a ghat section at dawn">
+      <span class="cell__cap"><small>Ghats</small>Charmadi, 05:41</span>
+    </button>
+    <button class="cell" data-cat="meets" data-src="https://picsum.photos/seed/katte-meet-1/1000/1000">
+      <img src="https://picsum.photos/seed/katte-meet-1/500/400" alt="Bikes parked in a row at a meetup">
+      <span class="cell__cap"><small>Meetups</small>Sunday Katte</span>
+    </button>
+    <div class="cell cell--note" aria-hidden="false">
+      <small lang="kn">ಒಟ್ಟಿಗೆ ಸವಾರಿ</small>
+      <b>Ride together, and the distance stops being the point.</b>
+    </div>
+    <button class="cell" data-cat="night" data-src="https://picsum.photos/seed/katte-night-1/1000/1000">
+      <img src="https://picsum.photos/seed/katte-night-1/500/400" alt="Headlights on a night ride">
+      <span class="cell__cap"><small>Night</small>NICE Road</span>
+    </button>
+    <button class="cell cell--w2" data-cat="charity" data-src="https://picsum.photos/seed/katte-charity-1/1200/700">
+      <img src="https://picsum.photos/seed/katte-charity-1/900/440" alt="Charity ride blood donation camp">
+      <span class="cell__cap"><small>Charity</small>Blood drive, Mysore</span>
+    </button>
+    <button class="cell" data-cat="ghats" data-src="https://picsum.photos/seed/katte-ghat-2/1000/1000">
+      <img src="https://picsum.photos/seed/katte-ghat-2/500/400" alt="A hairpin bend in the hills">
+      <span class="cell__cap"><small>Ghats</small>Kolli, bend 41</span>
+    </button>
+    <button class="cell" data-cat="night" data-src="https://picsum.photos/seed/katte-night-2/1000/1000">
+      <img src="https://picsum.photos/seed/katte-night-2/500/400" alt="Roadside tea stop after dark">
+      <span class="cell__cap"><small>Night</small>Chai, 02:10</span>
+    </button>
+    <button class="cell cell--w2" data-cat="meets" data-src="https://picsum.photos/seed/katte-meet-2/1200/700">
+      <img src="https://picsum.photos/seed/katte-meet-2/900/440" alt="Group photo of the club">
+      <span class="cell__cap"><small>Meetups</small>Anniversary, 2025</span>
+    </button>
+  </div>
+</section>
+
+<!-- ===================== BIKES ===================== -->
+<section class="gal shell" id="bikes">
+  <div class="head rv">
+    <h2>The Machines</h2>
+    <p>Any bike, any brand, any pace — this is what's parked at the katte.</p>
+  </div>
+
+  <div class="bento rv">
+    <figure class="cell cell--w2 cell--h2" style="cursor:default">
+      <img src="https://picsum.photos/seed/ktm-duke-390/900/760" alt="KTM Duke 390">
+      <span class="cell__cap"><small>KTM</small>Duke 390</span>
+    </figure>
+    <figure class="cell" style="cursor:default">
+      <img src="https://picsum.photos/seed/re-himalayan-450/500/400" alt="Royal Enfield Himalayan">
+      <span class="cell__cap"><small>Royal Enfield</small>Himalayan 450</span>
+    </figure>
+    <figure class="cell" style="cursor:default">
+      <img src="https://picsum.photos/seed/re-classic-350/500/400" alt="Royal Enfield Classic 350">
+      <span class="cell__cap"><small>Royal Enfield</small>Classic 350</span>
+    </figure>
+    <figure class="cell" style="cursor:default">
+      <img src="https://picsum.photos/seed/triumph-speed-400/500/400" alt="Triumph Speed 400">
+      <span class="cell__cap"><small>Triumph</small>Speed 400</span>
+    </figure>
+    <figure class="cell cell--w2" style="cursor:default">
+      <img src="https://picsum.photos/seed/tvs-ronin/900/440" alt="TVS Ronin">
+      <span class="cell__cap"><small>TVS</small>Ronin</span>
+    </figure>
+    <figure class="cell" style="cursor:default">
+      <img src="https://picsum.photos/seed/kawasaki-ninja-300/500/400" alt="Kawasaki Ninja 300">
+      <span class="cell__cap"><small>Kawasaki</small>Ninja 300</span>
+    </figure>
+    <figure class="cell" style="cursor:default">
+      <img src="https://picsum.photos/seed/ducati-monster/500/400" alt="Ducati Monster">
+      <span class="cell__cap"><small>Ducati</small>Monster</span>
+    </figure>
+    <figure class="cell cell--w2" style="cursor:default">
+      <img src="https://picsum.photos/seed/harley-x440/900/440" alt="Harley-Davidson X440">
+      <span class="cell__cap"><small>Harley-Davidson</small>X440</span>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== QUOTES ===================== -->
+<section class="quotes" aria-label="Rider quotes">
+  <div class="marq" aria-hidden="true" id="m1"></div>
+  <div class="marq marq--b" aria-hidden="true" id="m2"></div>
+</section>
+
+<!-- ===================== SAFETY ===================== -->
+<section class="safety shell" id="safety">
+  <div class="head rv">
+    <h2 data-i18n="safeh">Ride Safe</h2>
+    <p data-i18n="safep">Non-negotiable. Ride captains check gear at flag-off, and yes, people have been sent home.</p>
+  </div>
+  <div class="safe-grid rv">
+    <div class="safe">
+      <svg viewBox="0 0 24 24"><path d="M4 13a8 8 0 0 1 16 0v3H4z"/><path d="M4 16h16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>
+      <h3 data-i18n="s1h">Helmet</h3><p data-i18n="s1p">Full-face, ISI or ECE certified. No half-shells on club rides.</p>
+    </div>
+    <div class="safe">
+      <svg viewBox="0 0 24 24"><path d="M6 11V6a2 2 0 0 1 4 0v5"/><path d="M10 11V4.5a2 2 0 0 1 4 0V11"/><path d="M14 11V6a2 2 0 0 1 4 0v8a6 6 0 0 1-12 0v-3"/></svg>
+      <h3 data-i18n="s2h">Gloves & Boots</h3><p data-i18n="s2p">Knuckle protection and ankle cover. Hands go down first, always.</p>
+    </div>
+    <div class="safe">
+      <svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.5 8 9 4.6-.5 8-4 8-9V6z"/><path d="M12 8v5M9.5 10.5h5"/></svg>
+      <h3 data-i18n="s3h">First Aid</h3><p data-i18n="s3p">Sweep rider carries a kit. Know where it is before you need it.</p>
+    </div>
+    <div class="safe">
+      <svg viewBox="0 0 24 24"><path d="M5 18h14"/><path d="M7 18V9l5-4 5 4v9"/><path d="M10 18v-4h4v4"/></svg>
+      <h3 data-i18n="s4h">Formation</h3><p data-i18n="s4p">Staggered, two-second gap, lead and sweep marked in orange.</p>
+    </div>
+    <div class="safe">
+      <svg viewBox="0 0 24 24"><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/><circle cx="12" cy="12" r="3.2"/></svg>
+      <h3 data-i18n="s5h">Signals</h3><p data-i18n="s5p">Hand signals briefed at flag-off. Repeat them down the line.</p>
+    </div>
+  </div>
+
+  <div class="sos rv">
+    <span class="sos__b">SOS</span>
+    <p data-i18n="sosp">Every member profile carries <b>blood group</b> and an <b>emergency contact</b>, visible to ride captains offline. Club emergency line: <b>1800-000-0000</b>.</p>
+  </div>
+</section>
+
+<!-- ===================== JOIN ===================== -->
+<section class="join" id="join">
+  <div class="shell join__wrap">
+    <div class="rv">
+      <h2 data-i18n="joinh">Pull Up a Stone.</h2>
+      <p class="join__kn" lang="kn">ಸ್ನೇಹವೇ ನಮ್ಮ ಶಕ್ತಿ.</p>
+      <p class="join__note" data-i18n="joinp">Any bike, any brand, any pace. Come to one Sunday katte before you decide — that is the only real application form.</p>
+    </div>
+    <div class="rv">
+      <form class="form" id="form" novalidate>
+        <div class="row">
+          <div class="field">
+            <label for="f-name">Name</label>
+            <input id="f-name" name="name" type="text" placeholder="Your full name" required>
+            <span class="err" data-err="f-name"></span>
+          </div>
+          <div class="field">
+            <label for="f-phone">Phone</label>
+            <input id="f-phone" name="phone" type="tel" inputmode="numeric" placeholder="10-digit mobile" required>
+            <span class="err" data-err="f-phone"></span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="f-bike">Bike</label>
+            <input id="f-bike" name="bike" type="text" placeholder="e.g. Himalayan 450">
+            <span class="hint">Model and year, if you know it.</span>
+          </div>
+          <div class="field">
+            <label for="f-blood">Blood Group</label>
+            <select id="f-blood" name="blood">
+              <option value="">Select</option>
+              <option>A+</option><option>A−</option><option>B+</option><option>B−</option>
+              <option>O+</option><option>O−</option><option>AB+</option><option>AB−</option>
+            </select>
+            <span class="hint">Shared only with ride captains.</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-msg">Why do you ride?</label>
+          <textarea id="f-msg" name="msg" placeholder="One honest line is enough."></textarea>
+        </div>
+        <button class="btn btn--primary" type="submit" style="width:100%">Join the Brotherhood</button>
+      </form>
+      <div class="done" id="done" hidden>
+        <h3>You're on the list.</h3>
+        <p>A ride captain will call within two days. Next katte is Sunday, 07:00, Cubbon Park — no need to wait for the call.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="foot">
+  <div class="shell">
+    <div class="foot__top">
+      <div>
+        <span class="brand__mark">Bikers<em>Katte</em></span>
+        <p class="foot__blurb" data-i18n="footb">A riders' katte in Bengaluru since 2015. Any bike, any brand, any pace.</p>
+      </div>
+      <div>
+        <h4>Ride</h4>
+        <ul>
+          <li><a href="#rides">Calendar</a></li><li><a href="#rides">Route Maps</a></li>
+          <li><a href="#safety">Ride Rules</a></li><li><a href="#gallery">Gallery</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Club</h4>
+        <ul>
+          <li><a href="#creed">The Katte</a></li><li><a href="#join">Members</a></li>
+          <li><a href="#join">Store</a></li><li><a href="#join">Sponsors</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Help</h4>
+        <ul>
+          <li><a href="#safety">Emergency</a></li><li><a href="#join">Contact</a></li>
+          <li><a href="#join">FAQ</a></li><li><a href="#join">Privacy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot__bottom">
+      <span>© 2026 Bikers Katte, Bengaluru. <span lang="kn">ರಸ್ತೆಗಳು ನಮ್ಮ ಮನೆ.</span></span>
+      <div class="social">
+        <a href="#join" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></svg></a>
+        <a href="#join" aria-label="YouTube"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9.2l5 2.8-5 2.8z"/></svg></a>
+        <a href="#join" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.6A8.4 8.4 0 0 1 8.9 19L3 21l2-5.7a8.4 8.4 0 1 1 16 -3.7z"/></svg></a>
+        <a href="#join" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v7h4v-7h3l1-4h-4v-2a1 1 0 0 1 1-1z"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="lb__x" id="lbx" aria-label="Close">×</button>
+  <div><img id="lbimg" src="" alt=""><div class="lb__cap" id="lbcap"></div></div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- nav ---------- */
+  var nav=document.getElementById("nav"), prog=document.getElementById("prog");
+  function onScroll(){
+    nav.dataset.stuck = window.scrollY > 24;
+    var h=document.documentElement;
+    var p=h.scrollTop/(h.scrollHeight-h.clientHeight||1);
+    prog.style.width=(p*100).toFixed(2)+"%";
+  }
+  addEventListener("scroll",onScroll,{passive:true}); onScroll();
+
+  var burger=document.getElementById("burger"), sheet=document.getElementById("sheet");
+  burger.addEventListener("click",function(){
+    var open = sheet.dataset.open !== "true";
+    sheet.dataset.open = open;
+    burger.setAttribute("aria-expanded", open);
+  });
+  sheet.addEventListener("click",function(e){
+    if(e.target.tagName==="A"){ sheet.dataset.open="false"; burger.setAttribute("aria-expanded","false"); }
+  });
+
+  /* ---------- toast: enters and exits from the same direction ---------- */
+  var toastEl=document.getElementById("toast"), tT;
+  function toast(msg){
+    toastEl.textContent=msg; toastEl.dataset.show="true";
+    clearTimeout(tT); tT=setTimeout(function(){toastEl.dataset.show="false";},3200);
+  }
+
+  /* ---------- hero headline: masked rise, never from scale(0) ---------- */
+  var lines=document.querySelectorAll(".hero h1 .ln > span");
+  if(RM){ lines.forEach(function(s){s.style.transform="none";}); }
+  else{
+    lines.forEach(function(s,i){
+      s.style.transition="transform 760ms cubic-bezier(0.23,1,0.32,1) "+(90+i*90)+"ms";
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ s.style.transform="translateY(0)"; }); });
+    });
+    ["hero__sub","hero__cta"].forEach(function(c,i){
+      var el=document.querySelector("."+c); if(!el) return;
+      el.style.opacity=0; el.style.transform="translateY(14px)";
+      el.style.transition="opacity 620ms cubic-bezier(0.23,1,0.32,1) "+(420+i*110)+"ms, transform 620ms cubic-bezier(0.23,1,0.32,1) "+(420+i*110)+"ms";
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){
+        el.style.opacity=1; el.style.transform="none"; }); });
+    });
+  }
+
+  /* ---------- pointer parallax: lerp in rAF, never per-frame state ---------- */
+  var plates=[].slice.call(document.querySelectorAll(".plate,.stamp"));
+  if(!RM && plates.length && matchMedia("(hover:hover)").matches){
+    var tx=0,ty=0,cx=0,cy=0,raf=null;
+    addEventListener("pointermove",function(e){
+      tx=(e.clientX/innerWidth-.5)*2; ty=(e.clientY/innerHeight-.5)*2;
+      if(!raf) raf=requestAnimationFrame(tick);
+    },{passive:true});
+    function tick(){
+      cx+=(tx-cx)*0.075; cy+=(ty-cy)*0.075;   /* spring-ish, not instant */
+      plates.forEach(function(p){
+        var d=+p.dataset.depth||0;
+        p.style.transform="translate3d("+(cx*d)+"px,"+(cy*d*0.6)+"px,0)";
+      });
+      raf = (Math.abs(tx-cx)>0.001||Math.abs(ty-cy)>0.001) ? requestAnimationFrame(tick) : null;
+    }
+  }
+
+  /* ---------- reveal ---------- */
+  var io=new IntersectionObserver(function(en){
+    en.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
+  },{threshold:0.12,rootMargin:"0px 0px -8% 0px"});
+  document.querySelectorAll(".rv").forEach(function(el,i){
+    el.style.transitionDelay=(Math.min(i,4)*70)+"ms"; io.observe(el);
+  });
+
+  /* ---------- counters, Indian digit grouping ---------- */
+  function groupIN(n){
+    var s=String(n); if(s.length<=3) return s;
+    var last3=s.slice(-3), rest=s.slice(0,-3);
+    return rest.replace(/\B(?=(\d{2})+(?!\d))/g,",")+","+last3;
+  }
+  var cio=new IntersectionObserver(function(en){
+    en.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el=e.target, end=+el.dataset.count, ind="indian" in el.dataset;
+      cio.unobserve(el);
+      if(RM){ el.textContent = ind?groupIN(end):end; return; }
+      var t0=performance.now(), dur=1500;
+      (function step(t){
+        var k=Math.min((t-t0)/dur,1);
+        var e2=1-Math.pow(1-k,3);                  /* ease-out, never ease-in */
+        var v=Math.floor(end*e2);
+        el.textContent = ind?groupIN(v):v;
+        if(k<1) requestAnimationFrame(step);
+      })(t0);
+    });
+  },{threshold:0.5});
+  document.querySelectorAll("[data-count]").forEach(function(el){cio.observe(el);});
+
+  /* ---------- gallery filter + lightbox ---------- */
+  var chips=[].slice.call(document.querySelectorAll(".chip"));
+  var cells=[].slice.call(document.querySelectorAll("#bento .cell[data-cat]"));
+  chips.forEach(function(c){
+    c.addEventListener("click",function(){
+      chips.forEach(function(x){x.setAttribute("aria-pressed", x===c);});
+      var f=c.dataset.f;
+      cells.forEach(function(cell){ cell.hidden = !(f==="all" || cell.dataset.cat===f); });
+    });
+  });
+
+  var lb=document.getElementById("lb"), lbimg=document.getElementById("lbimg"),
+      lbcap=document.getElementById("lbcap"), lbx=document.getElementById("lbx"), last=null;
+  cells.forEach(function(cell){
+    cell.addEventListener("click",function(){
+      last=cell;
+      lbimg.src=cell.dataset.src;
+      lbimg.alt=cell.querySelector("img").alt;
+      lbcap.textContent=cell.querySelector(".cell__cap").textContent;
+      lb.dataset.open="true"; lbx.focus();
+    });
+  });
+  function closeLB(){ lb.dataset.open="false"; if(last) last.focus(); }
+  lbx.addEventListener("click",closeLB);
+  lb.addEventListener("click",function(e){ if(e.target===lb) closeLB(); });
+  addEventListener("keydown",function(e){
+    if(e.key==="Escape"){ if(lb.dataset.open==="true") closeLB();
+      if(sheet.dataset.open==="true"){sheet.dataset.open="false";burger.setAttribute("aria-expanded","false");} }
+  });
+
+  /* ---------- rides ---------- */
+  document.querySelectorAll("[data-reg]").forEach(function(b){
+    b.addEventListener("click",function(){
+      var name=b.closest(".ride").querySelector("h3").textContent;
+      toast("Registered — "+name);
+    });
+  });
+
+  /* ---------- form: inline errors below the field ---------- */
+  var form=document.getElementById("form"), done=document.getElementById("done");
+  function setErr(id,msg){
+    var f=document.getElementById(id), box=f.closest(".field");
+    box.dataset.invalid = !!msg;
+    box.querySelector(".err").textContent = msg||"";
+    f.setAttribute("aria-invalid", !!msg);
+  }
+  form.addEventListener("submit",function(e){
+    e.preventDefault();
+    var ok=true;
+    var n=document.getElementById("f-name"), p=document.getElementById("f-phone");
+    if(!n.value.trim()){ setErr("f-name","Tell us what to call you."); ok=false; } else setErr("f-name","");
+    if(!/^\d{10}$/.test(p.value.replace(/\D/g,""))){ setErr("f-phone","Needs 10 digits."); ok=false; } else setErr("f-phone","");
+    if(!ok){ (document.querySelector('[data-invalid="true"] input')||n).focus(); return; }
+    form.hidden=true; done.hidden=false; toast("Welcome to the katte.");
+  });
+  ["f-name","f-phone"].forEach(function(id){
+    document.getElementById(id).addEventListener("input",function(){
+      if(this.closest(".field").dataset.invalid==="true") setErr(id,"");
+    });
+  });
+
+  /* ---------- marquee ---------- */
+  var QA=["Four wheels move the body. Two wheels move the soul.","Brotherhood is measured in miles.",
+    "Fuel. Freedom. Friendship.","Every road tells a story.","Ride hard. Ride safe. Ride together.",
+    "Adventure is one ride away."];
+  var QB=["ರಸ್ತೆಗಳು ನಮ್ಮ ಮನೆ.","ಸ್ನೇಹವೇ ನಮ್ಮ ಶಕ್ತಿ.","ಒಂದೇ ಗುರಿ... ಸುರಕ್ಷಿತ ಸವಾರಿ.",
+    "ಬೈಕ್ ನಮ್ಮ ಪ್ರೀತಿ, ರಸ್ತೆ ನಮ್ಮ ಬದುಕು.","ಗಾಳಿ ನಮ್ಮ ಸಂಗಾತಿ.","ದೂರವೇ ನಮ್ಮ ಗುರಿ ಅಲ್ಲ, ಅನುಭವವೇ ನಮ್ಮ ಗುರಿ."];
+  function fill(el,arr,kn){
+    var h="";
+    for(var r=0;r<2;r++) arr.forEach(function(q){
+      h+='<span class="qt'+(kn?" qt--kn":"")+'"'+(kn?' lang="kn"':'')+'>'+q+'</span>';
+    });
+    el.innerHTML=h;
+  }
+  fill(document.getElementById("m1"),QA,false);
+  fill(document.getElementById("m2"),QB,true);
+
+  /* ---------- language: instant, no animation ---------- */
+  var KN={
+    sub:"<b>ಕಟ್ಟೆ</b> ಎಂದರೆ ಊರಿನ ಜನ ಸೇರಿ ಮಾತನಾಡುವ ಕಲ್ಲಿನ ಜಗುಲಿ. ನಮ್ಮದರ ಸುತ್ತ ಬೈಕುಗಳು ನಿಂತಿರುತ್ತವೆ, ಅಷ್ಟೇ.",
+    "l-members":"ಸದಸ್ಯರು","l-rides":"ಒಟ್ಟು ಸವಾರಿ","l-km":"ಕಿಲೋಮೀಟರ್","l-states":"ರಾಜ್ಯಗಳು",
+    "l-charity":"ಸೇವಾ ಸವಾರಿ","l-years":"ವರ್ಷಗಳು",
+    c1h:"ನಿಮ್ಮ ವೇಗದಲ್ಲಿ ಸವಾರಿ", c1p:"ಯಾರನ್ನೂ ಹಿಂದೆ ಬಿಡುವುದಿಲ್ಲ, ಯಾರನ್ನೂ ಒತ್ತಾಯಿಸುವುದಿಲ್ಲ. ನಿಧಾನ ಸವಾರನೇ ವೇಗ ನಿರ್ಧರಿಸುತ್ತಾನೆ — ಅದು ನಮ್ಮ ನಿಯಮ.",
+    c2h:"ಅಹಂಕಾರಕ್ಕಿಂತ ಸುರಕ್ಷತೆ", c2p:"ಫುಲ್-ಫೇಸ್, ಗ್ಲೌಸ್, ಬೂಟು. ಪ್ರತಿ ಸವಾರಿಗೂ. ಸಣ್ಣ ಪ್ರಯಾಣ ಎಂಬುದೇ ಇಲ್ಲ.",
+    c3h:"ರಸ್ತೆ ಎಲ್ಲರದ್ದು", c3p:"ಸಾಲಾಗಿ ಸವಾರಿ, ಮೊದಲೇ ಸಂಕೇತ. ಘಾಟಿ ರೇಸ್ ಟ್ರ್ಯಾಕ್ ಅಲ್ಲ. ನೀವು ದಾಟುವ ಊರಲ್ಲಿ ಜನ ನಾಳೆಯೂ ಬದುಕಬೇಕು.",
+    ridesh:"ಮುಂಬರುವ ಸವಾರಿಗಳು", ridesp:"ಕಬ್ಬನ್ ಪಾರ್ಕ್ ಕಟ್ಟೆಯಿಂದ ಹೊರಡುವಿಕೆ. ಗುರುವಾರದೊಳಗೆ ನೋಂದಣಿ.",
+    galh:"ರಸ್ತೆಯಿಂದ", galp:"ಹತ್ತು ವರ್ಷಗಳ ಮುಂಜಾನೆಗಳು, ರಸ್ತೆಬದಿ ಚಹಾ, ಮತ್ತು ಚಿಕ್ಕಮಗಳೂರಲ್ಲಿ ಸ್ಟಾರ್ಟ್ ಆಗದ ಬೈಕುಗಳು.",
+    safeh:"ಸುರಕ್ಷಿತ ಸವಾರಿ", safep:"ರಾಜಿ ಇಲ್ಲ. ಹೊರಡುವ ಮುನ್ನ ಕ್ಯಾಪ್ಟನ್ ಗೇರ್ ಪರಿಶೀಲಿಸುತ್ತಾರೆ.",
+    s1h:"ಹೆಲ್ಮೆಟ್", s1p:"ಫುಲ್-ಫೇಸ್, ISI ಅಥವಾ ECE ಪ್ರಮಾಣಿತ.",
+    s2h:"ಗ್ಲೌಸ್ ಮತ್ತು ಬೂಟು", s2p:"ಕೈ ಮೊದಲು ನೆಲಕ್ಕೆ ತಾಗುತ್ತದೆ. ಯಾವಾಗಲೂ.",
+    s3h:"ಪ್ರಥಮ ಚಿಕಿತ್ಸೆ", s3p:"ಸ್ವೀಪ್ ಸವಾರನ ಬಳಿ ಕಿಟ್ ಇರುತ್ತದೆ.",
+    s4h:"ಸಾಲು", s4p:"ಸ್ಟ್ಯಾಗರ್ಡ್, ಎರಡು ಸೆಕೆಂಡ್ ಅಂತರ.",
+    s5h:"ಸಂಕೇತಗಳು", s5p:"ಹೊರಡುವ ಮುನ್ನ ವಿವರಿಸಲಾಗುತ್ತದೆ. ಸಾಲಿನಲ್ಲಿ ಮುಂದುವರಿಸಿ.",
+    sosp:"ಪ್ರತಿ ಸದಸ್ಯರ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ <b>ರಕ್ತದ ಗುಂಪು</b> ಮತ್ತು <b>ತುರ್ತು ಸಂಪರ್ಕ</b> ಇರುತ್ತದೆ. ತುರ್ತು ಸಂಖ್ಯೆ: <b>1800-000-0000</b>.",
+    joinh:"ಒಂದು ಕಲ್ಲು ಎಳೆದುಕೊಳ್ಳಿ.", joinp:"ಯಾವುದೇ ಬೈಕ್, ಯಾವುದೇ ವೇಗ. ನಿರ್ಧರಿಸುವ ಮೊದಲು ಒಂದು ಭಾನುವಾರದ ಕಟ್ಟೆಗೆ ಬನ್ನಿ.",
+    footb:"2015 ರಿಂದ ಬೆಂಗಳೂರಿನ ಸವಾರರ ಕಟ್ಟೆ. ಯಾವುದೇ ಬೈಕ್, ಯಾವುದೇ ವೇಗ."
+  };
+  var EN={};
+  document.querySelectorAll("[data-i18n]").forEach(function(el){ EN[el.dataset.i18n]=el.innerHTML; });
+  document.querySelectorAll(".lang button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var kn = b.dataset.lang==="kn";
+      document.querySelectorAll(".lang button").forEach(function(x){
+        x.setAttribute("aria-pressed", x===b);
+      });
+      document.querySelectorAll("[data-i18n]").forEach(function(el){
+        var k=el.dataset.i18n, v = kn ? (KN[k]||EN[k]) : EN[k];
+        el.innerHTML=v;
+        if(kn && KN[k]) el.setAttribute("lang","kn"); else el.removeAttribute("lang");
+      });
+      toast(kn?"ಕನ್ನಡ":"English");
+    });
+  });
+
+  /* image fallback — if picsum is blocked, degrade to material, not to broken */
+  document.querySelectorAll(".plate img,.cell img").forEach(function(img){
+    img.addEventListener("error",function(){
+      img.style.display="none";
+      img.parentElement.style.background=
+        "linear-gradient(150deg,var(--gunmetal),var(--surface-2))";
+    });
+  });
+})();
+</script>
