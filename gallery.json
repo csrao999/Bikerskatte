@@ -1,0 +1,66 @@
+{
+  "_readme": "This file is managed by /admin (Decap CMS). You can also hand-edit it: cat = ghats | night | meets | charity | bikes. type = image | video. size = big | wide | (omit for normal).",
+
+  "photos": [
+    {
+      "src": "images/charmadi-dawn.jpg",
+      "type": "image",
+      "cat": "ghats",
+      "title": "Charmadi, 05:41",
+      "alt": "Riders on a ghat section at dawn",
+      "size": "big"
+    },
+    {
+      "src": "images/sunday-katte.jpg",
+      "type": "image",
+      "cat": "meets",
+      "title": "Sunday Katte",
+      "alt": "Bikes parked in a row at the katte"
+    },
+    {
+      "src": "images/nice-road-night.jpg",
+      "type": "image",
+      "cat": "night",
+      "title": "NICE Road",
+      "alt": "Headlights strung out on a night ride"
+    },
+    {
+      "src": "images/virajpet.jpg",
+      "type": "image",
+      "cat": "ghats",
+      "title": "Coorg – Virajpet",
+      "alt": "Coffee estates on the Virajpet road",
+      "size": "wide"
+    },
+    {
+      "src": "images/valparai.jpg",
+      "type": "image",
+      "cat": "ghats",
+      "title": "Valparai, bend 31",
+      "alt": "A hairpin bend climbing to Valparai"
+    },
+    {
+      "src": "images/wayanad.jpg",
+      "type": "image",
+      "cat": "ghats",
+      "title": "Wayanad",
+      "alt": "Riders stopped at a Wayanad viewpoint"
+    },
+    {
+      "src": "images/chai-stop.jpg",
+      "type": "image",
+      "cat": "night",
+      "title": "Chai, 02:10",
+      "alt": "Roadside tea stop after dark"
+    },
+    {
+      "src": "images/muthathi.jpg",
+      "type": "image",
+      "cat": "meets",
+      "title": "Muthathi, 18 Jul",
+      "alt": "The group at the Cauvery riverside at Muthathi",
+      "size": "wide"
+    }
+  ]
+}
+
