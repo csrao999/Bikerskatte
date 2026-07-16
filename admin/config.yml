@@ -1,0 +1,89 @@
+## ============================================================
+## Bikers Katte — gallery admin config
+##
+## backend.name: github  → members log in with their own GitHub
+##   account and commit straight to this repo. Netlify is used
+##   ONLY as a free OAuth relay (base_url below) — the site is
+##   still hosted entirely on GitHub Pages.
+## ============================================================
+
+backend:
+  name: github
+  repo: csrao999/Bikerskatte      # <- your GitHub username/repo
+  branch: main
+  base_url: https://api.netlify.com   # Netlify's free OAuth relay
+  # auth_endpoint defaults to "auth" — no need to set it
+
+# Where uploaded files land, and the path written into gallery.json.
+# Matches the "images/filename.jpg" paths gallery.json already uses.
+media_folder: "images"
+public_folder: "images"
+
+# Direct commits to main. Switch to editorial_workflow below if you
+# ever want ride uploads to open a draft/PR instead of publishing
+# immediately (useful once the group grows past a few trusted admins).
+publish_mode: simple
+# publish_mode: editorial_workflow
+
+collections:
+  - name: "gallery"
+    label: "Gallery"
+    files:
+      - name: "photos"
+        label: "Photos & Videos"
+        file: "gallery.json"
+        fields:
+          - label: "Keep this — do not edit"
+            name: "_readme"
+            widget: "hidden"
+            default: "Managed by /admin (Decap CMS). You can also hand-edit this file: cat = ghats | night | meets | charity | bikes. type = image | video. size = big | wide | (blank)."
+
+          - label: "Items"
+            name: "photos"
+            widget: "list"
+            summary: "{{fields.title}} — {{fields.cat}}"
+            fields:
+              - label: "Photo or video file"
+                name: "src"
+                widget: "file"
+                media_library:
+                  config:
+                    max_file_size: 26214400   # 26 MB — see note in the guide
+
+              - label: "Type"
+                name: "type"
+                widget: "select"
+                options: ["image", "video"]
+                default: "image"
+
+              - label: "Category"
+                name: "cat"
+                widget: "select"
+                options:
+                  - { label: "Ghats", value: "ghats" }
+                  - { label: "Night Rides", value: "night" }
+                  - { label: "Meetups", value: "meets" }
+                  - { label: "Charity", value: "charity" }
+                  - { label: "Bikes", value: "bikes" }
+                default: "meets"
+
+              - label: "Title"
+                name: "title"
+                widget: "string"
+                hint: "Short caption shown on the tile, e.g. \"Muthathi, 18 Jul\""
+
+              - label: "Alt text"
+                name: "alt"
+                widget: "string"
+                required: false
+                hint: "One line describing the image, for screen readers"
+
+              - label: "Tile size"
+                name: "size"
+                widget: "select"
+                options:
+                  - { label: "Normal", value: "" }
+                  - { label: "Wide (2 columns)", value: "wide" }
+                  - { label: "Big (2×2)", value: "big" }
+                required: false
+                default: ""
