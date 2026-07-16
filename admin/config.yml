@@ -14,6 +14,18 @@ backend:
   base_url: https://api.netlify.com   # Netlify's free OAuth relay
   # auth_endpoint defaults to "auth" — no need to set it
 
+  # REQUIRED because the real site lives on GitHub Pages, not Netlify.
+  # Without this, Netlify's OAuth relay can't figure out which of your
+  # Netlify projects holds the GitHub Client ID/Secret, and returns
+  # "Not Found". Set this to your Netlify project's own address —
+  # find it at: Netlify → your project → Site configuration → General
+  # → Site details → Site name / Default subdomain.
+  #
+  # NOTE: also add csrao999.github.io as a domain alias on this same
+  # Netlify project (Site configuration → Domain management → Add a
+  # domain) — Netlify's auth completion step checks that too.
+  site_domain: clinquant-salamander-66091c.netlify.app
+
 # Where uploaded files land, and the path written into gallery.json.
 # Matches the "images/filename.jpg" paths gallery.json already uses.
 media_folder: "images"
